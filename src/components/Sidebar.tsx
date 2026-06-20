@@ -44,8 +44,8 @@ export const STATUS_COLORS = [
 
 interface SidebarProps {
   appMode: 'roadmap' | 'capacity';
-  activeTab: 'editor' | 'json' | 'styles' | 'developers';
-  setActiveTab: (tab: 'editor' | 'json' | 'styles' | 'developers') => void;
+  activeTab: 'editor' | 'styles' | 'developers';
+  setActiveTab: (tab: 'editor' | 'styles' | 'developers') => void;
   
   milestones: Milestone[];
   config: RoadmapConfig;
@@ -63,12 +63,6 @@ interface SidebarProps {
   
   selectedTeamMemberId: string | null;
   setSelectedTeamMemberId: React.Dispatch<React.SetStateAction<string | null>>;
-
-  jsonText: string;
-  handleJsonChange: (val: string) => void;
-  jsonError: string | null;
-  copied: boolean;
-  copyJsonToClipboard: () => void;
 
   handleAddMilestone: () => void;
   handleDeleteMilestone: (id: string, e?: React.MouseEvent) => void;
@@ -110,11 +104,6 @@ export default function Sidebar({
   setSelectedMilestoneId,
   selectedTeamMemberId,
   setSelectedTeamMemberId,
-  jsonText,
-  handleJsonChange,
-  jsonError,
-  copied,
-  copyJsonToClipboard,
   handleAddMilestone,
   handleDeleteMilestone,
   handleUpdateMilestone,
@@ -155,17 +144,6 @@ export default function Sidebar({
         >
           <Sliders className="w-3.5 h-3.5 text-indigo-400" />
           Visual Editor
-        </button>
-        <button 
-          onClick={() => setActiveTab('json')}
-          className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition flex items-center justify-center gap-2 ${
-            activeTab === 'json' 
-              ? 'bg-slate-800 text-white shadow' 
-              : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
-          }`}
-        >
-          <Code className="w-3.5 h-3.5 text-indigo-400" />
-          JSON Data
         </button>
         <button 
           onClick={() => setActiveTab('styles')}
@@ -536,43 +514,6 @@ export default function Sidebar({
           </div>
         )}
 
-        {activeTab === 'json' && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">Interactive JSON Config</h2>
-              <button
-                onClick={copyJsonToClipboard}
-                className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-semibold bg-transparent border-0 cursor-pointer"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                {copied ? 'Copied' : 'Copy Configuration'}
-              </button>
-            </div>
-
-            <p className="text-xs text-slate-400">
-              Update your dataset in real-time by modifying the code content below. You can also paste your own exported layout dataset.
-            </p>
-
-            <div className="relative">
-              <textarea
-                value={jsonText}
-                onChange={(e) => handleJsonChange(e.target.value)}
-                className="w-full h-80 bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500 transition"
-                style={{ resize: 'vertical' }}
-                placeholder="{ ... }"
-              />
-              {jsonError && (
-                <div className="mt-2 p-2.5 bg-rose-950/40 text-rose-300 rounded-lg text-xs font-mono border border-rose-500/20">
-                  ⚠️ {jsonError}
-                </div>
-              )}
-            </div>
-
-            <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800/80 text-[11px] text-slate-400 leading-relaxed">
-              <span className="font-semibold text-white">How to import:</span> Make sure your JSON keeps the structure of <code>config</code> (with fields title, timelineColor, canvasBg, cardBg, cardBorder) and <code>milestones</code> (with arrays of objects holding id, title, subtitle, icon, status, statusBg, statusText, isHighlighted, assignees).
-            </div>
-          </div>
-        )}
 
         {activeTab === 'styles' && (
           <div className="space-y-4">

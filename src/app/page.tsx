@@ -18,6 +18,14 @@ import {
   reorderDevelopers,
   resetDevelopers
 } from './actions/developers';
+import {
+  getMilestones,
+  addMilestone,
+  updateMilestone,
+  deleteMilestone,
+  reorderMilestones,
+  resetMilestones
+} from './actions/milestones';
 
 // Import our new components
 import Header from '../components/Header';
@@ -35,13 +43,7 @@ function App() {
     return 'roadmap';
   });
 
-  const [milestones, setMilestones] = useState<Milestone[]>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('milestones_data');
-      return saved ? JSON.parse(saved) : INITIAL_MILESTONES;
-    }
-    return INITIAL_MILESTONES;
-  });
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
 
   const [config, setConfig] = useState<RoadmapConfig>(() => {
     if (typeof window !== 'undefined') {
@@ -62,18 +64,12 @@ function App() {
     return DEFAULT_CAPACITY_CONFIG;
   });
 
-  const [activeTab, setActiveTab] = useState<'editor' | 'json' | 'styles' | 'developers'>('editor');
+  const [activeTab, setActiveTab] = useState<'editor' | 'styles' | 'developers'>('editor');
   
-  const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>(() => {
-    return INITIAL_MILESTONES.length > 0 ? INITIAL_MILESTONES[0].id : null;
-  });
+  const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>(null);
 
   const [selectedTeamMemberId, setSelectedTeamMemberId] = useState<string | null>(null);
 
-  // State for raw JSON text input
-  const [jsonText, setJsonText] = useState('');
-  const [jsonError, setJsonError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
   const [newAssigneeName, setNewAssigneeName] = useState('');
   const [newAssigneeColor, setNewAssigneeColor] = useState(ASSIGNEE_COLORS[0].value);
   
@@ -90,10 +86,6 @@ function App() {
   }, [appMode]);
 
   useEffect(() => {
-    localStorage.setItem('milestones_data', JSON.stringify(milestones));
-  }, [milestones]);
-
-  useEffect(() => {
     localStorage.setItem('milestones_config', JSON.stringify(config));
   }, [config]);
 
@@ -101,7 +93,7 @@ function App() {
     localStorage.setItem('capacity_config_data', JSON.stringify(capacityConfig));
   }, [capacityConfig]);
 
-  // Load team members from SQLite on mount
+  // Load team members and milestones from SQLite on mount
   useEffect(() => {
     getDevelopers().then((data) => {
       if (data && data.length > 0) {
@@ -114,16 +106,19 @@ function App() {
         setSelectedTeamMemberId(INITIAL_TEAM_MEMBERS[0].id);
       }
     });
-  }, []);
 
-  // Sync state to JSON text input based on active mode
-  useEffect(() => {
-    if (appMode === 'roadmap') {
-      setJsonText(JSON.stringify({ config, milestones }, null, 2));
-    } else {
-      setJsonText(JSON.stringify({ config: capacityConfig, teamMembers }, null, 2));
-    }
-  }, [milestones, config, teamMembers, capacityConfig, appMode]);
+    getMilestones().then((data) => {
+      if (data && data.length > 0) {
+        setMilestones(data);
+        setSelectedMilestoneId(data[0].id);
+      } else {
+        setMilestones(INITIAL_MILESTONES);
+        if (INITIAL_MILESTONES.length > 0) {
+          setSelectedMilestoneId(INITIAL_MILESTONES[0].id);
+        }
+      }
+    });
+  }, []);
 
   // Helper to trigger transient banner notifications
   const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
@@ -148,24 +143,43 @@ function App() {
         { id: `${newId}-1`, name: 'Assignee', color: ASSIGNEE_COLORS[2].value }
       ]
     };
-    const updated = [...milestones, newMilestone];
-    setMilestones(updated);
-    setSelectedMilestoneId(newId);
-    showNotification('Added new milestone milestone card!');
+    addMilestone(newMilestone).then((success) => {
+      if (success) {
+        setMilestones(prev => [...prev, newMilestone]);
+        setSelectedMilestoneId(newId);
+        showNotification('Added new milestone stage!');
+      } else {
+        showNotification('Failed to add milestone to database', 'error');
+      }
+    });
   };
 
   const handleDeleteMilestone = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    const filtered = milestones.filter(m => m.id !== id);
-    setMilestones(filtered);
-    if (selectedMilestoneId === id) {
-      setSelectedMilestoneId(filtered.length > 0 ? filtered[0].id : null);
-    }
-    showNotification('Milestone removed', 'error');
+    deleteMilestone(id).then((success) => {
+      if (success) {
+        const filtered = milestones.filter(m => m.id !== id);
+        setMilestones(filtered);
+        if (selectedMilestoneId === id) {
+          setSelectedMilestoneId(filtered.length > 0 ? filtered[0].id : null);
+        }
+        showNotification('Milestone removed', 'error');
+      } else {
+        showNotification('Failed to delete milestone from database', 'error');
+      }
+    });
   };
 
   const handleUpdateMilestone = <K extends keyof Milestone>(id: string, key: K, value: Milestone[K]) => {
-    setMilestones(prev => prev.map(m => m.id === id ? { ...m, [key]: value } : m));
+    const current = milestones.find(m => m.id === id);
+    if (!current) return;
+    const updatedMilestone = { ...current, [key]: value };
+    setMilestones(prev => prev.map(m => m.id === id ? updatedMilestone : m));
+    updateMilestone(updatedMilestone).then((success) => {
+      if (!success) {
+        showNotification('Failed to update milestone in database', 'error');
+      }
+    });
   };
 
   const handleMoveMilestone = (index: number, direction: 'up' | 'down') => {
@@ -178,7 +192,15 @@ function App() {
     result.splice(targetIndex, 0, removed);
     
     setMilestones(result);
-    showNotification(`Moved milestone ${direction}`);
+    
+    const orderedIds = result.map(m => m.id);
+    reorderMilestones(orderedIds).then((success) => {
+      if (success) {
+        showNotification(`Moved milestone ${direction}`);
+      } else {
+        showNotification('Failed to save order to database', 'error');
+      }
+    });
   };
 
   // --- HANDLERS FOR ASSIGNEES ---
@@ -292,43 +314,20 @@ function App() {
     });
   };
 
-  // --- HANDLERS FOR JSON CONFIG ---
-  
-  const handleJsonChange = (val: string) => {
-    setJsonText(val);
-    try {
-      const parsed = JSON.parse(val);
-      if (parsed && typeof parsed === 'object') {
-        if (appMode === 'roadmap') {
-          if (parsed.config) setConfig(parsed.config);
-          if (Array.isArray(parsed.milestones)) setMilestones(parsed.milestones);
-        } else {
-          if (parsed.config) setCapacityConfig(parsed.config);
-          if (Array.isArray(parsed.teamMembers)) {
-            setTeamMembers(parsed.teamMembers);
-            setSelectedDeveloperIds(parsed.teamMembers.map((m: any) => m.id));
-          }
-        }
-        setJsonError(null);
-      }
-    } catch (err: any) {
-      setJsonError(err.message || 'Syntax Error in JSON format');
-    }
-  };
-
-  const copyJsonToClipboard = () => {
-    navigator.clipboard.writeText(jsonText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    showNotification('Configuration copied to clipboard!');
-  };
-
   const handleResetToDefault = () => {
     if (appMode === 'roadmap') {
-      setMilestones(INITIAL_MILESTONES);
-      setConfig(DEFAULT_CONFIG);
-      setSelectedMilestoneId(INITIAL_MILESTONES[0].id);
-      showNotification('Reset roadmap to mockup reference values');
+      resetMilestones(INITIAL_MILESTONES).then((success) => {
+        if (success) {
+          setMilestones(INITIAL_MILESTONES);
+          setConfig(DEFAULT_CONFIG);
+          if (INITIAL_MILESTONES.length > 0) {
+            setSelectedMilestoneId(INITIAL_MILESTONES[0].id);
+          }
+          showNotification('Reset roadmap to mockup reference values');
+        } else {
+          showNotification('Failed to reset milestones database', 'error');
+        }
+      });
     } else {
       resetDevelopers(INITIAL_TEAM_MEMBERS).then((success) => {
         if (success) {
@@ -726,11 +725,6 @@ function App() {
           setSelectedMilestoneId={setSelectedMilestoneId}
           selectedTeamMemberId={selectedTeamMemberId}
           setSelectedTeamMemberId={setSelectedTeamMemberId}
-          jsonText={jsonText}
-          handleJsonChange={handleJsonChange}
-          jsonError={jsonError}
-          copied={copied}
-          copyJsonToClipboard={copyJsonToClipboard}
           handleAddMilestone={handleAddMilestone}
           handleDeleteMilestone={handleDeleteMilestone}
           handleUpdateMilestone={handleUpdateMilestone}
