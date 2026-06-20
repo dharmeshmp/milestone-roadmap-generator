@@ -6,7 +6,9 @@ import {
   Check, 
   Info,
   Users,
-  Sliders
+  Sliders,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { Milestone, RoadmapConfig, Assignee, TeamMember, CapacityConfig, JiraTicket } from '../types';
 import { INITIAL_MILESTONES, DEFAULT_CONFIG, INITIAL_TEAM_MEMBERS, DEFAULT_CAPACITY_CONFIG } from '../initialData';
@@ -94,6 +96,7 @@ function App() {
   const [newMemberUtil, setNewMemberUtil] = useState<number>(85);
 
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Sync state to local storage when changed
   useEffect(() => {
@@ -746,7 +749,24 @@ function App() {
 
       {/* View Mode Mode Segmented Control Bar */}
       <div className="bg-slate-900 border-b border-slate-800/80 px-6 py-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shrink-0">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="p-1.5 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl text-slate-400 hover:text-white transition flex items-center justify-center gap-1 active:scale-95 cursor-pointer"
+            title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            {isSidebarCollapsed ? (
+              <>
+                <ChevronRight className="w-4 h-4 text-indigo-400" />
+                <span className="text-[10px] font-bold pr-1">Show Sidebar</span>
+              </>
+            ) : (
+              <>
+                <ChevronLeft className="w-4 h-4" />
+                <span className="text-[10px] font-bold pr-1">Hide Sidebar</span>
+              </>
+            )}
+          </button>
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           <span className="text-xs font-bold text-slate-350 uppercase tracking-widest font-mono">WORKSPACE FORMATTER</span>
         </div>
@@ -792,36 +812,40 @@ function App() {
       <main className="flex-grow flex flex-col lg:flex-row overflow-hidden">
         
         {/* Sidebar Component */}
-        <Sidebar
-          appMode={appMode}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          milestones={milestones}
-          config={config}
-          setConfig={setConfig}
-          teamMembers={teamMembers}
-          capacityConfig={capacityConfig}
-          setCapacityConfig={setCapacityConfig}
-          selectedDeveloperIds={selectedDeveloperIds}
-          setSelectedDeveloperIds={setSelectedDeveloperIds}
-          selectedMilestoneId={selectedMilestoneId}
-          setSelectedMilestoneId={setSelectedMilestoneId}
-          handleAddMilestone={handleAddMilestone}
-          handleDeleteMilestone={handleDeleteMilestone}
-          handleUpdateMilestone={handleUpdateMilestone}
-          handleMoveMilestone={handleMoveMilestone}
-          newAssigneeName={newAssigneeName}
-          setNewAssigneeName={setNewAssigneeName}
-          handleAddAssignee={handleAddAssignee}
-          handleRemoveAssignee={handleRemoveAssignee}
-          tickets={tickets}
-          selectedTicketId={selectedTicketId}
-          setSelectedTicketId={setSelectedTicketId}
-          handleAddTicket={handleAddTicket}
-          handleDeleteTicket={handleDeleteTicket}
-          handleUpdateTicket={handleUpdateTicket}
-          selectedDate={selectedDate}
-        />
+        <div className={`transition-all duration-300 ease-in-out overflow-hidden flex ${
+          isSidebarCollapsed ? 'w-0 opacity-0 pointer-events-none' : 'w-full lg:w-[460px] xl:w-[500px] opacity-100'
+        } shrink-0`}>
+          <Sidebar
+            appMode={appMode}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            milestones={milestones}
+            config={config}
+            setConfig={setConfig}
+            teamMembers={teamMembers}
+            capacityConfig={capacityConfig}
+            setCapacityConfig={setCapacityConfig}
+            selectedDeveloperIds={selectedDeveloperIds}
+            setSelectedDeveloperIds={setSelectedDeveloperIds}
+            selectedMilestoneId={selectedMilestoneId}
+            setSelectedMilestoneId={setSelectedMilestoneId}
+            handleAddMilestone={handleAddMilestone}
+            handleDeleteMilestone={handleDeleteMilestone}
+            handleUpdateMilestone={handleUpdateMilestone}
+            handleMoveMilestone={handleMoveMilestone}
+            newAssigneeName={newAssigneeName}
+            setNewAssigneeName={setNewAssigneeName}
+            handleAddAssignee={handleAddAssignee}
+            handleRemoveAssignee={handleRemoveAssignee}
+            tickets={tickets}
+            selectedTicketId={selectedTicketId}
+            setSelectedTicketId={setSelectedTicketId}
+            handleAddTicket={handleAddTicket}
+            handleDeleteTicket={handleDeleteTicket}
+            handleUpdateTicket={handleUpdateTicket}
+            selectedDate={selectedDate}
+          />
+        </div>
 
         {/* Right Side: Interactive Preview Canvas stage */}
         <section className={`flex-grow p-4 md:p-8 overflow-y-auto flex items-center justify-center transition-colors duration-300 ${getCanvasBgClass()}`}>
