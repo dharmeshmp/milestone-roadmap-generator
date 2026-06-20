@@ -49,7 +49,7 @@ export interface JiraTicket {
   title: string;
   assignee_id: string | null;
   date: string; // YYYY-MM-DD
-  status: 'To Do' | 'In Progress' | 'Done';
+  status: 'To Do' | 'In Progress' | 'Reassigned' | 'Done';
   remark: string;
   timelog: number; // in hours
 }

@@ -9,7 +9,7 @@ export async function getTickets(): Promise<JiraTicket[]> {
     return rows.map(r => ({
       id: r.id,
       title: r.title,
-      status: r.status as 'To Do' | 'In Progress' | 'Done',
+      status: r.status as 'To Do' | 'In Progress' | 'Reassigned' | 'Done',
       assignee_id: r.assignee_id,
       date: r.date,
       remark: r.remark || '',

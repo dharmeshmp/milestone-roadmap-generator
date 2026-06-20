@@ -118,7 +118,7 @@ export default function Sidebar({
   const [newTicketIdLocal, setNewTicketIdLocal] = React.useState('');
   const [newTicketTitleLocal, setNewTicketTitleLocal] = React.useState('');
   const [newTicketAssigneeLocal, setNewTicketAssigneeLocal] = React.useState('');
-  const [newTicketStatusLocal, setNewTicketStatusLocal] = React.useState<'To Do' | 'In Progress' | 'Done'>('To Do');
+  const [newTicketStatusLocal, setNewTicketStatusLocal] = React.useState<'To Do' | 'In Progress' | 'Reassigned' | 'Done'>('To Do');
   const [newTicketRemarkLocal, setNewTicketRemarkLocal] = React.useState('');
   const [newTicketHoursLocal, setNewTicketHoursLocal] = React.useState(0);
   const [newTicketDateLocal, setNewTicketDateLocal] = React.useState(() => {
@@ -263,6 +263,7 @@ export default function Sidebar({
                           >
                             <option value="To Do">To Do</option>
                             <option value="In Progress">In Progress</option>
+                            <option value="Reassigned">Reassigned</option>
                             <option value="Done">Done</option>
                           </select>
                         </div>
@@ -347,6 +348,7 @@ export default function Sidebar({
                     >
                       <option value="To Do">To Do</option>
                       <option value="In Progress">In Progress</option>
+                      <option value="Reassigned">Reassigned</option>
                       <option value="Done">Done</option>
                     </select>
                   </div>

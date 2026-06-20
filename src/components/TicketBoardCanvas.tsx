@@ -23,7 +23,7 @@ export default function TicketBoardCanvas({
 }: TicketBoardCanvasProps) {
   
   // State for dragging column feedback
-  const [draggedOverColumn, setDraggedOverColumn] = React.useState<'To Do' | 'In Progress' | 'Done' | null>(null);
+  const [draggedOverColumn, setDraggedOverColumn] = React.useState<'To Do' | 'In Progress' | 'Reassigned' | 'Done' | null>(null);
 
   // Filter tickets by selected date
   const filteredTickets = tickets.filter(t => t.date === selectedDate);
@@ -31,6 +31,7 @@ export default function TicketBoardCanvas({
   // Group by status
   const todoTickets = filteredTickets.filter(t => t.status === 'To Do');
   const inProgressTickets = filteredTickets.filter(t => t.status === 'In Progress');
+  const reassignedTickets = filteredTickets.filter(t => t.status === 'Reassigned');
   const doneTickets = filteredTickets.filter(t => t.status === 'Done');
 
   // Helper to calculate total hours logged today
@@ -44,7 +45,7 @@ export default function TicketBoardCanvas({
     e.dataTransfer.setData('text/plain', id);
   };
 
-  const handleDrop = (e: React.DragEvent, status: 'To Do' | 'In Progress' | 'Done') => {
+  const handleDrop = (e: React.DragEvent, status: 'To Do' | 'In Progress' | 'Reassigned' | 'Done') => {
     e.preventDefault();
     const ticketId = e.dataTransfer.getData('text/plain');
     if (ticketId) {
@@ -146,7 +147,7 @@ export default function TicketBoardCanvas({
       </div>
 
       {/* Kanban Grid Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* Column 1: To Do */}
         <div 
           onDragOver={(e) => e.preventDefault()}
@@ -207,7 +208,37 @@ export default function TicketBoardCanvas({
           </div>
         </div>
 
-        {/* Column 3: Done */}
+        {/* Column 3: Reassigned */}
+        <div 
+          onDragOver={(e) => e.preventDefault()}
+          onDragEnter={() => setDraggedOverColumn('Reassigned')}
+          onDragLeave={() => setDraggedOverColumn(null)}
+          onDrop={(e) => { handleDrop(e, 'Reassigned'); setDraggedOverColumn(null); }}
+          className={`rounded-2xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[300px] ${
+            draggedOverColumn === 'Reassigned' 
+              ? 'border-amber-400 ring-2 ring-amber-400/20 bg-amber-50/15' 
+              : 'bg-amber-50/20 border-amber-100/30'
+          }`}
+        >
+          <div className="flex items-center justify-between pb-1">
+            <span className="text-xs font-extrabold text-amber-700 uppercase tracking-widest flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+              Reassigned
+            </span>
+            <span className="text-xs font-mono bg-amber-100/60 px-2 py-0.5 rounded-full font-bold text-amber-800">
+              {reassignedTickets.length}
+            </span>
+          </div>
+          <div className="flex flex-col gap-3 overflow-y-auto max-h-[50vh] pr-0.5">
+            {reassignedTickets.length === 0 ? (
+              <div className="text-center py-10 text-slate-400 text-xs italic">No reassigned tickets</div>
+            ) : (
+              reassignedTickets.map(renderTicketCard)
+            )}
+          </div>
+        </div>
+
+        {/* Column 4: Done */}
         <div 
           onDragOver={(e) => e.preventDefault()}
           onDragEnter={() => setDraggedOverColumn('Done')}
