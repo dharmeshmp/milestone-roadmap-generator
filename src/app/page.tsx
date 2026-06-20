@@ -29,6 +29,14 @@ import {
 } from 'lucide-react';
 import { Milestone, RoadmapConfig, IconType, Assignee, TeamMember, CapacityConfig } from '../types';
 import { INITIAL_MILESTONES, DEFAULT_CONFIG, INITIAL_TEAM_MEMBERS, DEFAULT_CAPACITY_CONFIG } from '../initialData';
+import { 
+  getDevelopers, 
+  addDeveloper, 
+  updateDeveloper, 
+  deleteDeveloper, 
+  reorderDevelopers,
+  resetDevelopers
+} from './actions/developers';
 
 // Color Presets for assignees
 const ASSIGNEE_COLORS = [
@@ -69,25 +77,21 @@ function App() {
     return saved ? JSON.parse(saved) : DEFAULT_CONFIG;
   });
 
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(() => {
-    const saved = localStorage.getItem('capacity_team_members_data');
-    return saved ? JSON.parse(saved) : INITIAL_TEAM_MEMBERS;
-  });
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [selectedDeveloperIds, setSelectedDeveloperIds] = useState<string[]>([]);
 
   const [capacityConfig, setCapacityConfig] = useState<CapacityConfig>(() => {
     const saved = localStorage.getItem('capacity_config_data');
     return saved ? JSON.parse(saved) : DEFAULT_CAPACITY_CONFIG;
   });
 
-  const [activeTab, setActiveTab] = useState<'editor' | 'json' | 'styles'>('editor');
+  const [activeTab, setActiveTab] = useState<'editor' | 'json' | 'styles' | 'developers'>('editor');
   
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>(() => {
     return INITIAL_MILESTONES.length > 0 ? INITIAL_MILESTONES[0].id : null;
   });
 
-  const [selectedTeamMemberId, setSelectedTeamMemberId] = useState<string | null>(() => {
-    return INITIAL_TEAM_MEMBERS.length > 0 ? INITIAL_TEAM_MEMBERS[0].id : null;
-  });
+  const [selectedTeamMemberId, setSelectedTeamMemberId] = useState<string | null>(null);
 
   // State for raw JSON text input
   const [jsonText, setJsonText] = useState('');
@@ -117,12 +121,23 @@ function App() {
   }, [config]);
 
   useEffect(() => {
-    localStorage.setItem('capacity_team_members_data', JSON.stringify(teamMembers));
-  }, [teamMembers]);
-
-  useEffect(() => {
     localStorage.setItem('capacity_config_data', JSON.stringify(capacityConfig));
   }, [capacityConfig]);
+
+  // Load team members from SQLite on mount
+  useEffect(() => {
+    getDevelopers().then((data) => {
+      if (data && data.length > 0) {
+        setTeamMembers(data);
+        setSelectedDeveloperIds(data.map(m => m.id));
+        setSelectedTeamMemberId(prev => prev === null || !data.some(m => m.id === prev) ? data[0].id : prev);
+      } else {
+        setTeamMembers(INITIAL_TEAM_MEMBERS);
+        setSelectedDeveloperIds(INITIAL_TEAM_MEMBERS.map(m => m.id));
+        setSelectedTeamMemberId(INITIAL_TEAM_MEMBERS[0].id);
+      }
+    });
+  }, []);
 
   // Sync state to JSON text input based on active mode
   useEffect(() => {
@@ -233,24 +248,48 @@ function App() {
       role: newMemberRole,
       utilization: newMemberUtil
     };
-    setTeamMembers([...teamMembers, newMember]);
-    setSelectedTeamMemberId(newId);
-    setNewMemberName('');
-    showNotification(`Added team member ${newMember.name}!`);
+    
+    addDeveloper(newMember).then((success) => {
+      if (success) {
+        setTeamMembers([...teamMembers, newMember]);
+        setSelectedTeamMemberId(newId);
+        setNewMemberName('');
+        showNotification(`Added team member ${newMember.name}!`);
+      } else {
+        showNotification('Failed to add team member to database', 'error');
+      }
+    });
   };
 
   const handleUpdateTeamMember = <K extends keyof TeamMember>(id: string, key: K, value: TeamMember[K]) => {
-    setTeamMembers(prev => prev.map(m => m.id === id ? { ...m, [key]: value } : m));
+    const member = teamMembers.find(m => m.id === id);
+    if (!member) return;
+    const updatedMember = { ...member, [key]: value };
+    
+    setTeamMembers(prev => prev.map(m => m.id === id ? updatedMember : m));
+    
+    updateDeveloper(updatedMember).then((success) => {
+      if (!success) {
+        showNotification('Failed to update team member in database', 'error');
+      }
+    });
   };
 
   const handleDeleteTeamMember = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    const filtered = teamMembers.filter(m => m.id !== id);
-    setTeamMembers(filtered);
-    if (selectedTeamMemberId === id) {
-      setSelectedTeamMemberId(filtered.length > 0 ? filtered[0].id : null);
-    }
-    showNotification('Member removed', 'error');
+    
+    deleteDeveloper(id).then((success) => {
+      if (success) {
+        const filtered = teamMembers.filter(m => m.id !== id);
+        setTeamMembers(filtered);
+        if (selectedTeamMemberId === id) {
+          setSelectedTeamMemberId(filtered.length > 0 ? filtered[0].id : null);
+        }
+        showNotification('Member removed', 'error');
+      } else {
+        showNotification('Failed to delete team member from database', 'error');
+      }
+    });
   };
 
   const handleMoveTeamMember = (index: number, direction: 'up' | 'down') => {
@@ -263,7 +302,15 @@ function App() {
     result.splice(targetIndex, 0, removed);
     
     setTeamMembers(result);
-    showNotification(`Moved member ${direction}`);
+    
+    const orderedIds = result.map(m => m.id);
+    reorderDevelopers(orderedIds).then((success) => {
+      if (success) {
+        showNotification(`Moved member ${direction}`);
+      } else {
+        showNotification('Failed to save order to database', 'error');
+      }
+    });
   };
 
   // --- HANDLERS FOR JSON CONFIG ---
@@ -301,10 +348,16 @@ function App() {
       setSelectedMilestoneId(INITIAL_MILESTONES[0].id);
       showNotification('Reset roadmap to mockup reference values');
     } else {
-      setTeamMembers(INITIAL_TEAM_MEMBERS);
-      setCapacityConfig(DEFAULT_CAPACITY_CONFIG);
-      setSelectedTeamMemberId(INITIAL_TEAM_MEMBERS[0].id);
-      showNotification('Reset team capacity to mockup reference values');
+      resetDevelopers(INITIAL_TEAM_MEMBERS).then((success) => {
+        if (success) {
+          setTeamMembers(INITIAL_TEAM_MEMBERS);
+          setCapacityConfig(DEFAULT_CAPACITY_CONFIG);
+          setSelectedTeamMemberId(INITIAL_TEAM_MEMBERS[0].id);
+          showNotification('Reset team capacity to mockup reference values');
+        } else {
+          showNotification('Failed to reset developers database', 'error');
+        }
+      });
     }
   };
 
@@ -497,7 +550,8 @@ function App() {
       const colHeaderHeight = 22;
       const legendHeight = 55;
       const totalWidth = 520;
-      const totalHeight = headerHeight + colHeaderHeight + (teamMembers.length * rowHeight) + legendHeight + padding;
+      const activeMembers = teamMembers.filter(m => selectedDeveloperIds.includes(m.id));
+      const totalHeight = headerHeight + colHeaderHeight + (activeMembers.length * rowHeight) + legendHeight + padding;
 
       let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalWidth} ${totalHeight}" width="${totalWidth}" height="${totalHeight}" style="background-color: white; font-family: 'Inter', system-ui, sans-serif;">`;
       
@@ -542,7 +596,7 @@ function App() {
 
       // 3. Render members list inside individual cards (or layout blocks)
       const listStartY = colY + 15;
-      teamMembers.forEach((member, index) => {
+      activeMembers.forEach((member, index) => {
         const itemY = listStartY + index * rowHeight;
         
         let color = '#0d9488'; // green (Available)
@@ -805,6 +859,17 @@ function App() {
               <Layers className="w-3.5 h-3.5 text-indigo-400" />
               Canvas Settings
             </button>
+            <button 
+              onClick={() => setActiveTab('developers')}
+              className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition flex items-center justify-center gap-2 ${
+                activeTab === 'developers' 
+                  ? 'bg-slate-800 text-white shadow' 
+                  : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
+              }`}
+            >
+              <Users className="w-3.5 h-3.5 text-indigo-400" />
+              Developers
+            </button>
           </div>
 
           {/* Active Tab View */}
@@ -1046,16 +1111,23 @@ function App() {
                         <div className="p-2.5 bg-slate-950/70 border border-slate-800 rounded-xl space-y-2">
                           <p className="text-[10px] text-slate-400 font-bold">New Owner Badge Setup</p>
                           <div className="flex flex-col sm:flex-row gap-2">
-                            <input 
-                              type="text"
+                            <select 
                               value={newAssigneeName}
-                              onChange={(e) => setNewAssigneeName(e.target.value)}
-                              placeholder="Name (e.g. Dharmesh)"
-                              className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleAddAssignee(selectedMilestone.id);
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setNewAssigneeName(val);
+                                const devIndex = teamMembers.findIndex(m => m.name === val);
+                                if (devIndex !== -1) {
+                                  setNewAssigneeColor(ASSIGNEE_COLORS[devIndex % ASSIGNEE_COLORS.length].value);
+                                }
                               }}
-                            />
+                              className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                            >
+                              <option value="">Select Developer...</option>
+                              {teamMembers.map((m) => (
+                                <option key={m.id} value={m.name}>{m.name}</option>
+                              ))}
+                            </select>
                             <div className="flex gap-1.5 items-center">
                               <select 
                                 value={newAssigneeColor}
@@ -1106,170 +1178,49 @@ function App() {
               </>
             ) : (
               <>
-                {/* Team Members List Column Controllers */}
-                <div>
+                {/* Select Developers */}
+                <div className="space-y-4">
                   <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">Team Members</h2>
-                    <span className="text-xs text-slate-500 font-mono">{teamMembers.length} active engineers</span>
+                    <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">Select Developers</h2>
+                    <span className="text-xs text-slate-500 font-mono">{selectedDeveloperIds.length} of {teamMembers.length} selected</span>
                   </div>
 
-                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1 bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/80">
+                  <div className="space-y-2 bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/80 max-h-[60vh] overflow-y-auto">
                     {teamMembers.length === 0 ? (
                       <div className="text-center py-6 text-slate-500 text-xs">
-                        No team members defined. Click "+ Add New Teammate" below.
+                        No developers found. Go to the "Developers" tab to add them.
                       </div>
                     ) : (
-                      teamMembers.map((member, idx) => {
-                        const isFocused = member.id === selectedTeamMemberId;
-                        let statusColor = 'bg-teal-500';
-                        if (member.utilization >= capacityConfig.orangeThreshold) {
-                          statusColor = 'bg-rose-500 ring-rose-500/30';
-                        } else if (member.utilization >= capacityConfig.greenThreshold) {
-                          statusColor = 'bg-amber-500 ring-amber-500/30';
-                        }
+                      teamMembers.map((member) => {
+                        const isChecked = selectedDeveloperIds.includes(member.id);
                         return (
-                          <div 
+                          <label 
                             key={member.id}
-                            onClick={() => setSelectedTeamMemberId(member.id)}
-                            className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer border transition ${
-                              isFocused 
-                                ? 'bg-indigo-950/25 border-indigo-500/40 text-white' 
-                                : 'bg-slate-900 hover:bg-slate-800/80 border-transparent text-slate-300'
-                            }`}
+                            className="flex items-center gap-3 p-2.5 rounded-lg cursor-pointer bg-slate-900 hover:bg-slate-850 border border-slate-800 transition"
                           >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${statusColor} ring-2`} />
-                              <div className="truncate">
-                                <p className="font-semibold text-xs truncate max-w-[140px] text-slate-205">{member.name}</p>
-                                <p className="text-[9px] text-slate-400 uppercase tracking-wider font-bold truncate max-w-[145px]">{member.role}</p>
-                              </div>
+                            <input 
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => {
+                                if (isChecked) {
+                                  setSelectedDeveloperIds(selectedDeveloperIds.filter(id => id !== member.id));
+                                } else {
+                                  setSelectedDeveloperIds([...selectedDeveloperIds, member.id]);
+                                }
+                              }}
+                              className="w-4 h-4 text-indigo-600 bg-slate-950 border-slate-800 rounded focus:ring-indigo-500 focus:ring-2 focus:ring-offset-slate-900 cursor-pointer"
+                            />
+                            <div className="flex-grow">
+                              <p className="font-semibold text-xs text-slate-200">{member.name}</p>
+                              <p className="text-[9px] text-slate-400 uppercase tracking-wider font-bold">{member.role}</p>
                             </div>
-
-                            <div className="flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition">
-                              <span className="text-[11px] font-mono font-bold mr-2 text-slate-400">{member.utilization}%</span>
-                              <button 
-                                onClick={(e) => { e.stopPropagation(); handleMoveTeamMember(idx, 'up'); }}
-                                disabled={idx === 0}
-                                className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-slate-800 text-slate-450"
-                                title="Move Rank Up"
-                              >
-                                <ArrowUp className="w-3.5 h-3.5" />
-                              </button>
-                              <button 
-                                onClick={(e) => { e.stopPropagation(); handleMoveTeamMember(idx, 'down'); }}
-                                disabled={idx === teamMembers.length - 1}
-                                className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-slate-800 text-slate-450"
-                                title="Move Rank Down"
-                              >
-                                <ArrowDown className="w-3.5 h-3.5" />
-                              </button>
-                              <button 
-                                onClick={(e) => handleDeleteTeamMember(member.id, e)}
-                                className="p-1 hover:text-rose-400 rounded hover:bg-slate-800 text-slate-500"
-                                title="Delete Member"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
+                            <span className="text-xs font-mono font-bold text-slate-400">{member.utilization}%</span>
+                          </label>
                         );
                       })
                     )}
                   </div>
-
-                  <button
-                    onClick={handleAddTeamMember}
-                    className="mt-3 w-full py-2 px-3 bg-[#be185d] hover:bg-[#9d174d] active:scale-98 transition rounded-xl font-semibold text-xs text-center text-white flex items-center justify-center gap-1.5"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add New Teammate
-                  </button>
                 </div>
-
-                {/* Focused Teammate Detail Form Editor */}
-                {selectedTeamMember ? (
-                  <div className="border border-slate-800 bg-slate-900/60 p-4 rounded-xl space-y-4 shadow-sm font-sans">
-                    <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
-                      <div className="flex items-center gap-2">
-                        <span className="p-1 rounded bg-slate-800 text-rose-400 font-mono text-[9px] uppercase tracking-wider font-bold">EDITING TEAM</span>
-                        <h3 className="font-bold text-xs text-white truncate max-w-[180px]">
-                          {selectedTeamMember.name}
-                        </h3>
-                      </div>
-                      <button 
-                        onClick={(e) => handleDeleteTeamMember(selectedTeamMember.id, e)}
-                        className="text-rose-400 hover:text-rose-300 text-xs flex items-center gap-1 font-semibold"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        Delete Profile
-                      </button>
-                    </div>
-
-                    {/* Inputs */}
-                    <div className="space-y-3">
-                      
-                      {/* Teammate Name & Assigned Role */}
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Name</label>
-                          <input 
-                            type="text"
-                            value={selectedTeamMember.name}
-                            onChange={(e) => handleUpdateTeamMember(selectedTeamMember.id, 'name', e.target.value)}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
-                            placeholder="e.g. Ronak"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Role Title</label>
-                          <input 
-                            type="text"
-                            value={selectedTeamMember.role}
-                            onChange={(e) => handleUpdateTeamMember(selectedTeamMember.id, 'role', e.target.value)}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
-                            placeholder="e.g. Lead Specialist"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Utilization track slider */}
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase">Utilisation Level</label>
-                          <span className="text-xs font-mono font-bold text-slate-200">{selectedTeamMember.utilization}%</span>
-                        </div>
-                        <input 
-                          type="range"
-                          min="0"
-                          max="150"
-                          step="5"
-                          value={selectedTeamMember.utilization}
-                          onChange={(e) => handleUpdateTeamMember(selectedTeamMember.id, 'utilization', parseInt(e.target.value))}
-                          className="w-full accent-rose-600 cursor-pointer h-1.5 bg-slate-950 rounded-lg appearance-none"
-                        />
-                        
-                        {/* Forecast Banner advice */}
-                        <div className="p-2.5 rounded-lg border text-xs font-semibold flex items-center justify-between mt-1 select-none transition-colors duration-200"
-                          style={{
-                            backgroundColor: selectedTeamMember.utilization >= capacityConfig.orangeThreshold ? 'rgba(239, 68, 68, 0.08)' : selectedTeamMember.utilization >= capacityConfig.greenThreshold ? 'rgba(245, 158, 11, 0.08)' : 'rgba(13, 148, 136, 0.08)',
-                            borderColor: selectedTeamMember.utilization >= capacityConfig.orangeThreshold ? '#ef444420' : selectedTeamMember.utilization >= capacityConfig.greenThreshold ? '#f59e0b20' : '#0d948820',
-                            color: selectedTeamMember.utilization >= capacityConfig.orangeThreshold ? '#fca5a5' : selectedTeamMember.utilization >= capacityConfig.greenThreshold ? '#fcd34d' : '#99f6e4'
-                          }}
-                        >
-                          <span>Capacity Forecast:</span>
-                          <span className="font-bold">
-                            {selectedTeamMember.utilization >= capacityConfig.orangeThreshold ? '🔴 OVERLOADED' : selectedTeamMember.utilization >= capacityConfig.greenThreshold ? '🟡 BUSY' : '🟢 AVAILABLE'}
-                          </span>
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-slate-900/40 p-6 rounded-xl border border-slate-800 text-center text-slate-400 text-xs">
-                    Please insert or select a Team Member above to configure their load capacity.
-                  </div>
-                )}
               </>
             )}
           </div>
@@ -1436,6 +1387,184 @@ function App() {
                   </div>
                 </div>
 
+              </div>
+            )}
+
+            {activeTab === 'developers' && (
+              <div className="space-y-6">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">Developers</h2>
+                    <span className="text-xs text-slate-500 font-mono">{teamMembers.length} engineers</span>
+                  </div>
+
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1 bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/80">
+                    {teamMembers.length === 0 ? (
+                      <div className="text-center py-6 text-slate-500 text-xs">
+                        No team members yet. Click "+ Add New Teammate" below.
+                      </div>
+                    ) : (
+                      teamMembers.map((member, idx) => {
+                        const isFocused = member.id === selectedTeamMemberId;
+                        let statusColor = 'bg-teal-500 ring-teal-500/20';
+                        if (member.utilization >= capacityConfig.orangeThreshold) {
+                          statusColor = 'bg-rose-500 ring-rose-500/20';
+                        } else if (member.utilization >= capacityConfig.greenThreshold) {
+                          statusColor = 'bg-amber-500 ring-amber-500/20';
+                        }
+                        return (
+                          <div 
+                            key={member.id}
+                            onClick={() => setSelectedTeamMemberId(member.id)}
+                            className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer border transition ${
+                              isFocused 
+                                ? 'bg-indigo-950/25 border-indigo-500/40 text-white' 
+                                : 'bg-slate-900 hover:bg-slate-800/80 border-transparent text-slate-300'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${statusColor} ring-2`} />
+                              <div className="truncate">
+                                <p className="font-semibold text-xs truncate max-w-[140px] text-slate-200">{member.name}</p>
+                                <p className="text-[9px] text-slate-400 uppercase tracking-wider font-bold truncate max-w-[145px]">{member.role}</p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition">
+                              <span className="text-[11px] font-mono font-bold mr-2 text-slate-400">{member.utilization}%</span>
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handleMoveTeamMember(idx, 'up'); }}
+                                disabled={idx === 0}
+                                className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-slate-800 text-slate-400"
+                                title="Move Rank Up"
+                              >
+                                <ArrowUp className="w-3.5 h-3.5" />
+                              </button>
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handleMoveTeamMember(idx, 'down'); }}
+                                disabled={idx === teamMembers.length - 1}
+                                className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-slate-800 text-slate-400"
+                                title="Move Rank Down"
+                              >
+                                <ArrowDown className="w-3.5 h-3.5" />
+                              </button>
+                              <button 
+                                onClick={(e) => handleDeleteTeamMember(member.id, e)}
+                                className="p-1 hover:text-rose-400 rounded hover:bg-slate-800 text-slate-500"
+                                title="Delete Member"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+
+                {/* Focused Teammate Detail Form Editor */}
+                {selectedTeamMember ? (
+                  <div className="border border-slate-800 bg-slate-900/60 p-4 rounded-xl space-y-4 shadow-sm font-sans">
+                    <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                      <div className="flex items-center gap-2">
+                        <span className="p-1 rounded bg-slate-800 text-rose-400 font-mono text-[9px] uppercase tracking-wider font-bold">EDITING TEAM</span>
+                        <h3 className="font-bold text-xs text-white truncate max-w-[180px]">
+                          {selectedTeamMember.name}
+                        </h3>
+                      </div>
+                      <button 
+                        onClick={(e) => handleDeleteTeamMember(selectedTeamMember.id, e)}
+                        className="text-rose-400 hover:text-rose-300 text-xs flex items-center gap-1 font-semibold"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Delete Profile
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Name</label>
+                          <input 
+                            type="text"
+                            value={selectedTeamMember.name}
+                            onChange={(e) => handleUpdateTeamMember(selectedTeamMember.id, 'name', e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                            placeholder="e.g. Ronak"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Role</label>
+                          <select 
+                            value={selectedTeamMember.role}
+                            onChange={(e) => handleUpdateTeamMember(selectedTeamMember.id, 'role', e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                          >
+                            <option value="Specialist">Specialist</option>
+                            <option value="Associate">Associate</option>
+                            <option value="Lead">Lead</option>
+                            <option value="Manager">Manager</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase mb-1">
+                          <span>Utilization</span>
+                          <span className="text-white font-mono">{selectedTeamMember.utilization}%</span>
+                        </div>
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max="150" 
+                          step="5"
+                          value={selectedTeamMember.utilization} 
+                          onChange={(e) => handleUpdateTeamMember(selectedTeamMember.id, 'utilization', parseInt(e.target.value, 10))}
+                          className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-slate-500 text-xs bg-slate-900/20 border border-dashed border-slate-800 rounded-xl">
+                    Select a developer from the list above to edit their details.
+                  </div>
+                )}
+
+                {/* Quick Add Teammate Card */}
+                <div className="p-4 bg-slate-900/40 border border-slate-800/80 rounded-xl space-y-3">
+                  <h3 className="text-xs font-bold text-slate-300">Quick Add Member</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Name" 
+                      value={newMemberName} 
+                      onChange={(e) => setNewMemberName(e.target.value)}
+                      className="bg-slate-950 border border-slate-800 rounded-lg py-1 px-2.5 text-xs text-white focus:outline-none"
+                      onKeyDown={(e) => { if (e.key === 'Enter') handleAddTeamMember(); }}
+                    />
+                    <select 
+                      value={newMemberRole} 
+                      onChange={(e) => setNewMemberRole(e.target.value)}
+                      className="bg-slate-950 border border-slate-800 rounded-lg py-1 px-1.5 text-xs text-white focus:outline-none"
+                    >
+                      <option value="Associate">Associate</option>
+                      <option value="Specialist">Specialist</option>
+                      <option value="Lead">Lead</option>
+                      <option value="Manager">Manager</option>
+                    </select>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] text-slate-400">Default Util: {newMemberUtil}%</span>
+                    <button 
+                      onClick={handleAddTeamMember}
+                      className="px-3 py-1 bg-[#be185d] hover:bg-[#9d174d] rounded-lg text-xs font-bold text-white transition active:scale-95"
+                    >
+                      Add Teammate
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -1635,12 +1764,12 @@ function App() {
 
                 {/* Team Members List */}
                 <div className="mt-4 space-y-4">
-                  {teamMembers.length === 0 ? (
+                  {teamMembers.filter(m => selectedDeveloperIds.includes(m.id)).length === 0 ? (
                     <div className="py-12 text-center text-slate-400 italic">
-                      Add team members in the sidebar to visualize capacity.
+                      Select developers in the sidebar to visualize capacity.
                     </div>
                   ) : (
-                    teamMembers.map((member) => {
+                    teamMembers.filter(m => selectedDeveloperIds.includes(m.id)).map((member) => {
                       const isSelected = member.id === selectedTeamMemberId;
                       
                       let barColor = 'bg-teal-600';
