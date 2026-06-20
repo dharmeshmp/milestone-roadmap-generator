@@ -69,10 +69,10 @@ export const DEFAULT_CONFIG: RoadmapConfig = {
 };
 
 export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
-  { id: 'tm-1', name: 'Ronak', role: 'Specialist', utilization: 90 },
-  { id: 'tm-2', name: 'Shivam', role: 'Associate', utilization: 85 },
-  { id: 'tm-3', name: 'Saurav', role: 'Associate', utilization: 85 },
-  { id: 'tm-4', name: 'Shashvat', role: 'Associate', utilization: 75 }
+  { id: 'tm-1', name: 'Ronak', role: 'Specialist', utilization: 90, color: '#2580eb' },
+  { id: 'tm-2', name: 'Shivam', role: 'Associate', utilization: 85, color: '#e28a2a' },
+  { id: 'tm-3', name: 'Saurav', role: 'Associate', utilization: 85, color: '#db3e3e' },
+  { id: 'tm-4', name: 'Shashvat', role: 'Associate', utilization: 75, color: '#4f46e5' }
 ];
 
 export const DEFAULT_CAPACITY_CONFIG: CapacityConfig = {

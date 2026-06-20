@@ -32,7 +32,8 @@ export interface TeamMember {
   id: string;
   name: string;
   role: string; // e.g. 'Specialist', 'Associate'
-  utilization: number; // 0 to 100
+  utilization: number; // 0 to 105
+  color: string; // Hex color for developer badge
 }
 
 export interface CapacityConfig {

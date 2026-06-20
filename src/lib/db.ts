@@ -12,6 +12,7 @@ db.exec(`
     name TEXT NOT NULL,
     role TEXT NOT NULL,
     utilization INTEGER DEFAULT 0,
+    color TEXT DEFAULT '#2580eb',
     sort_order INTEGER DEFAULT 0
   );
 
@@ -41,11 +42,11 @@ db.exec(`
 // Seed initial developers if empty
 const countDevs = db.prepare('SELECT COUNT(*) as count FROM developers').get() as { count: number };
 if (countDevs.count === 0) {
-  const insert = db.prepare('INSERT INTO developers (id, name, role, utilization, sort_order) VALUES (?, ?, ?, ?, ?)');
-  insert.run('tm-1', 'Ronak', 'Specialist', 90, 1);
-  insert.run('tm-2', 'Shivam', 'Associate', 85, 2);
-  insert.run('tm-3', 'Saurav', 'Associate', 85, 3);
-  insert.run('tm-4', 'Shashvat', 'Associate', 75, 4);
+  const insert = db.prepare('INSERT INTO developers (id, name, role, utilization, color, sort_order) VALUES (?, ?, ?, ?, ?, ?)');
+  insert.run('tm-1', 'Ronak', 'Specialist', 90, '#2580eb', 1);
+  insert.run('tm-2', 'Shivam', 'Associate', 85, '#e28a2a', 2);
+  insert.run('tm-3', 'Saurav', 'Associate', 85, '#db3e3e', 3);
+  insert.run('tm-4', 'Shashvat', 'Associate', 75, '#4f46e5', 4);
 }
 
 // Seed initial milestones if empty

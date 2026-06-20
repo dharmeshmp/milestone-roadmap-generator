@@ -5,7 +5,7 @@ import { TeamMember } from '../../types';
 
 export async function getDevelopers(): Promise<TeamMember[]> {
   try {
-    const rows = db.prepare('SELECT id, name, role, utilization FROM developers ORDER BY sort_order ASC').all() as TeamMember[];
+    const rows = db.prepare('SELECT id, name, role, utilization, color FROM developers ORDER BY sort_order ASC').all() as TeamMember[];
     return rows;
   } catch (error) {
     console.error('Failed to get developers:', error);
@@ -18,8 +18,8 @@ export async function addDeveloper(member: TeamMember): Promise<boolean> {
     const maxSort = db.prepare('SELECT COALESCE(MAX(sort_order), 0) as maxSort FROM developers').get() as { maxSort: number };
     const nextSort = maxSort.maxSort + 1;
     
-    db.prepare('INSERT INTO developers (id, name, role, utilization, sort_order) VALUES (?, ?, ?, ?, ?)')
-      .run(member.id, member.name, member.role, member.utilization, nextSort);
+    db.prepare('INSERT INTO developers (id, name, role, utilization, color, sort_order) VALUES (?, ?, ?, ?, ?, ?)')
+      .run(member.id, member.name, member.role, member.utilization, member.color, nextSort);
     return true;
   } catch (error) {
     console.error('Failed to add developer:', error);
@@ -29,8 +29,8 @@ export async function addDeveloper(member: TeamMember): Promise<boolean> {
 
 export async function updateDeveloper(member: TeamMember): Promise<boolean> {
   try {
-    db.prepare('UPDATE developers SET name = ?, role = ?, utilization = ? WHERE id = ?')
-      .run(member.name, member.role, member.utilization, member.id);
+    db.prepare('UPDATE developers SET name = ?, role = ?, utilization = ?, color = ? WHERE id = ?')
+      .run(member.name, member.role, member.utilization, member.color, member.id);
     return true;
   } catch (error) {
     console.error('Failed to update developer:', error);
@@ -67,12 +67,12 @@ export async function reorderDevelopers(orderedIds: string[]): Promise<boolean> 
 export async function resetDevelopers(initialMembers: TeamMember[]): Promise<boolean> {
   try {
     const deleteStmt = db.prepare('DELETE FROM developers');
-    const insertStmt = db.prepare('INSERT INTO developers (id, name, role, utilization, sort_order) VALUES (?, ?, ?, ?, ?)');
+    const insertStmt = db.prepare('INSERT INTO developers (id, name, role, utilization, color, sort_order) VALUES (?, ?, ?, ?, ?, ?)');
     
     const transaction = db.transaction((members: TeamMember[]) => {
       deleteStmt.run();
       members.forEach((m, index) => {
-        insertStmt.run(m.id, m.name, m.role, m.utilization, index + 1);
+        insertStmt.run(m.id, m.name, m.role, m.utilization, m.color, index + 1);
       });
     });
     

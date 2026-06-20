@@ -1,10 +1,11 @@
 import React from 'react';
 import { AlertTriangle, ClipboardList, Calendar, CheckSquare, Sparkles } from 'lucide-react';
-import { Milestone, RoadmapConfig, IconType } from '../types';
+import { Milestone, RoadmapConfig, TeamMember, IconType } from '../types';
 
 interface RoadmapCanvasProps {
   milestones: Milestone[];
   config: RoadmapConfig;
+  teamMembers: TeamMember[];
   selectedMilestoneId: string | null;
   setSelectedMilestoneId: (id: string | null) => void;
 }
@@ -12,6 +13,7 @@ interface RoadmapCanvasProps {
 export default function RoadmapCanvas({
   milestones,
   config,
+  teamMembers,
   selectedMilestoneId,
   setSelectedMilestoneId,
 }: RoadmapCanvasProps) {
@@ -170,15 +172,19 @@ export default function RoadmapCanvas({
 
                       {/* Assignee badges listed horizontally below title */}
                       <div className="flex flex-wrap gap-1.5 pt-2">
-                        {milestone.assignees.map((a) => (
-                          <span 
-                            key={a.id}
-                            className="px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold text-white shadow-sm flex items-center gap-1 select-none"
-                            style={{ backgroundColor: a.color }}
-                          >
-                            {a.name}
-                          </span>
-                        ))}
+                        {milestone.assignees.map((a) => {
+                          const dev = teamMembers?.find(t => t.name.toLowerCase() === a.name.toLowerCase());
+                          const badgeColor = dev ? dev.color : a.color;
+                          return (
+                            <span 
+                              key={a.id}
+                              className="px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold text-white shadow-sm flex items-center gap-1 select-none"
+                              style={{ backgroundColor: badgeColor }}
+                            >
+                              {a.name}
+                            </span>
+                          );
+                        })}
                       </div>
                     </div>
 

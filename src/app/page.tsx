@@ -71,7 +71,6 @@ function App() {
   const [selectedTeamMemberId, setSelectedTeamMemberId] = useState<string | null>(null);
 
   const [newAssigneeName, setNewAssigneeName] = useState('');
-  const [newAssigneeColor, setNewAssigneeColor] = useState(ASSIGNEE_COLORS[0].value);
   
   // States for Team Capacity Member editing
   const [newMemberName, setNewMemberName] = useState('');
@@ -213,10 +212,13 @@ function App() {
     const currentMilestone = milestones.find(m => m.id === milestoneId);
     if (!currentMilestone) return;
 
+    const dev = teamMembers.find(t => t.name.toLowerCase() === newAssigneeName.trim().toLowerCase());
+    const assigneeColor = dev ? dev.color : ASSIGNEE_COLORS[0].value;
+
     const newAssignee: Assignee = {
       id: Date.now().toString(),
       name: newAssigneeName.trim(),
-      color: newAssigneeColor
+      color: assigneeColor
     };
 
     const updatedAssignees = [...currentMilestone.assignees, newAssignee];
@@ -245,7 +247,8 @@ function App() {
       id: newId,
       name: newMemberName.trim(),
       role: newMemberRole,
-      utilization: newMemberUtil
+      utilization: newMemberUtil,
+      color: ASSIGNEE_COLORS[teamMembers.length % ASSIGNEE_COLORS.length].value
     };
     
     addDeveloper(newMember).then((success) => {
@@ -498,10 +501,12 @@ function App() {
         m.assignees.forEach((a) => {
           const tagWidth = a.name.length * 6 + 22;
           const tagHeight = 22;
+          const dev = teamMembers.find(t => t.name.toLowerCase() === a.name.toLowerCase());
+          const badgeColor = dev ? dev.color : a.color;
           
           svgContent += `
             <g transform="translate(${assigneeX}, ${assigneeY})">
-              <rect width="${tagWidth}" height="${tagHeight}" rx="6" fill="${a.color}" />
+              <rect width="${tagWidth}" height="${tagHeight}" rx="6" fill="${badgeColor}" />
               <text x="${tagWidth/2}" y="14" text-anchor="middle" class="pill-text" fill="#ffffff">${a.name}</text>
             </g>
           `;
@@ -731,8 +736,6 @@ function App() {
           handleMoveMilestone={handleMoveMilestone}
           newAssigneeName={newAssigneeName}
           setNewAssigneeName={setNewAssigneeName}
-          newAssigneeColor={newAssigneeColor}
-          setNewAssigneeColor={setNewAssigneeColor}
           handleAddAssignee={handleAddAssignee}
           handleRemoveAssignee={handleRemoveAssignee}
           newMemberName={newMemberName}
@@ -767,6 +770,7 @@ function App() {
               <RoadmapCanvas
                 milestones={milestones}
                 config={config}
+                teamMembers={teamMembers}
                 selectedMilestoneId={selectedMilestoneId}
                 setSelectedMilestoneId={setSelectedMilestoneId}
               />

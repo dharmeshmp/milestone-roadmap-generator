@@ -71,8 +71,6 @@ interface SidebarProps {
 
   newAssigneeName: string;
   setNewAssigneeName: (val: string) => void;
-  newAssigneeColor: string;
-  setNewAssigneeColor: (val: string) => void;
   handleAddAssignee: (milestoneId: string) => void;
   handleRemoveAssignee: (milestoneId: string, assigneeId: string) => void;
 
@@ -110,8 +108,6 @@ export default function Sidebar({
   handleMoveMilestone,
   newAssigneeName,
   setNewAssigneeName,
-  newAssigneeColor,
-  setNewAssigneeColor,
   handleAddAssignee,
   handleRemoveAssignee,
   newMemberName,
@@ -380,7 +376,9 @@ export default function Sidebar({
                               <div 
                                 key={assignee.id}
                                 className="px-2.5 py-1 rounded-lg text-xs font-semibold text-white flex items-center shadow"
-                                style={{ backgroundColor: assignee.color }}
+                                style={{ 
+                                  backgroundColor: teamMembers.find(t => t.name.toLowerCase() === assignee.name.toLowerCase())?.color || assignee.color 
+                                }}
                               >
                                 <span>{assignee.name}</span>
                                 <button 
@@ -398,59 +396,24 @@ export default function Sidebar({
                         {/* Add Assignee Input Panel */}
                         <div className="p-2.5 bg-slate-950/70 border border-slate-800 rounded-xl space-y-2">
                           <p className="text-[10px] text-slate-400 font-bold">New Owner Badge Setup</p>
-                          <div className="flex flex-col sm:flex-row gap-2">
+                          <div className="flex gap-2">
                             <select 
                               value={newAssigneeName}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setNewAssigneeName(val);
-                                const devIndex = teamMembers.findIndex(m => m.name === val);
-                                if (devIndex !== -1) {
-                                  setNewAssigneeColor(ASSIGNEE_COLORS[devIndex % ASSIGNEE_COLORS.length].value);
-                                }
-                              }}
-                              className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                              onChange={(e) => setNewAssigneeName(e.target.value)}
+                              className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                             >
                               <option value="">Select Developer...</option>
                               {teamMembers.map((m) => (
                                 <option key={m.id} value={m.name}>{m.name}</option>
                               ))}
                             </select>
-                            <div className="flex gap-1.5 items-center">
-                              <select 
-                                value={newAssigneeColor}
-                                onChange={(e) => setNewAssigneeColor(e.target.value)}
-                                className="bg-slate-900 border border-slate-800 rounded-lg py-1 px-1.5 text-xs text-white"
-                              >
-                                {ASSIGNEE_COLORS.map((c) => (
-                                  <option key={c.value} value={c.value}>{c.name}</option>
-                                ))}
-                              </select>
-                              <button
-                                type="button"
-                                onClick={() => handleAddAssignee(selectedMilestone.id)}
-                                className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-xs font-bold text-white whitespace-nowrap active:scale-95 transition"
-                              >
-                                Assign
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Quick color circles preview */}
-                          <div className="flex gap-1.5 items-center pt-1 overflow-x-auto">
-                            <span className="text-[9px] text-slate-500 uppercase font-bold mr-1">Palette:</span>
-                            {ASSIGNEE_COLORS.map((col) => (
-                              <button
-                                key={col.value}
-                                type="button"
-                                onClick={() => setNewAssigneeColor(col.value)}
-                                className={`w-3.5 h-3.5 rounded-full border transition flex justify-center items-center ${
-                                  newAssigneeColor === col.value ? 'border-white scale-125 ring-2 ring-indigo-500/30' : 'border-transparent'
-                                }`}
-                                style={{ backgroundColor: col.value }}
-                                title={col.name}
-                              />
-                            ))}
+                            <button
+                              type="button"
+                              onClick={() => handleAddAssignee(selectedMilestone.id)}
+                              className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-xs font-bold text-white whitespace-nowrap active:scale-95 transition"
+                            >
+                              Assign
+                            </button>
                           </div>
                         </div>
 
@@ -763,6 +726,39 @@ export default function Sidebar({
                       onChange={(e) => handleUpdateTeamMember(selectedTeamMember.id, 'utilization', parseInt(e.target.value, 10))}
                       className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
                     />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Badge Color</label>
+                    <div className="flex gap-2 items-center">
+                      <input 
+                        type="color" 
+                        value={selectedTeamMember.color || '#2580eb'} 
+                        onChange={(e) => handleUpdateTeamMember(selectedTeamMember.id, 'color', e.target.value)}
+                        className="w-8 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
+                      />
+                      <input 
+                        type="text" 
+                        value={selectedTeamMember.color || '#2580eb'} 
+                        onChange={(e) => handleUpdateTeamMember(selectedTeamMember.id, 'color', e.target.value)}
+                        className="flex-grow bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+                      />
+                    </div>
+                    {/* Quick color circles preview */}
+                    <div className="flex gap-1.5 items-center pt-2 overflow-x-auto">
+                      {ASSIGNEE_COLORS.map((col) => (
+                        <button
+                          key={col.value}
+                          type="button"
+                          onClick={() => handleUpdateTeamMember(selectedTeamMember.id, 'color', col.value)}
+                          className={`w-3.5 h-3.5 rounded-full border transition flex justify-center items-center ${
+                            selectedTeamMember.color === col.value ? 'border-white scale-125 ring-2 ring-indigo-500/30' : 'border-transparent'
+                          }`}
+                          style={{ backgroundColor: col.value }}
+                          title={col.name}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
