@@ -1,0 +1,883 @@
+import React from 'react';
+import { 
+  Plus, 
+  Trash2, 
+  ArrowUp, 
+  ArrowDown, 
+  Copy, 
+  Check, 
+  Info, 
+  Code, 
+  Sparkles,
+  Lock,
+  AlertTriangle,
+  ClipboardList,
+  Calendar,
+  CheckSquare,
+  Sliders,
+  Layers,
+  Users
+} from 'lucide-react';
+import { Milestone, RoadmapConfig, TeamMember, CapacityConfig, IconType } from '../types';
+
+// Color Presets for assignees
+export const ASSIGNEE_COLORS = [
+  { name: 'Red', value: '#db3e3e' },
+  { name: 'Amber/Orange', value: '#e28a2a' },
+  { name: 'Blue', value: '#2580eb' },
+  { name: 'Emerald Green', value: '#16a34a' },
+  { name: 'Teal', value: '#0d9488' },
+  { name: 'Indigo/Purple', value: '#4f46e5' },
+  { name: 'Rose', value: '#e11d48' },
+  { name: 'Brown/Terracotta', value: '#c0522b' },
+  { name: 'Dark Slate', value: '#475569' }
+];
+
+// Presets for status background colors
+export const STATUS_COLORS = [
+  { name: 'Dark Navy', bg: 'bg-[#1a235a]', text: 'text-white' },
+  { name: 'Vibrant Emerald', bg: 'bg-emerald-600', text: 'text-white' },
+  { name: 'Amber Warning', bg: 'bg-amber-500', text: 'text-black' },
+  { name: 'Crimson Red', bg: 'bg-red-600', text: 'text-white' },
+  { name: 'Cloud Slate', bg: 'bg-slate-200', text: 'text-slate-800' }
+];
+
+interface SidebarProps {
+  appMode: 'roadmap' | 'capacity';
+  activeTab: 'editor' | 'json' | 'styles' | 'developers';
+  setActiveTab: (tab: 'editor' | 'json' | 'styles' | 'developers') => void;
+  
+  milestones: Milestone[];
+  config: RoadmapConfig;
+  setConfig: React.Dispatch<React.SetStateAction<RoadmapConfig>>;
+  
+  teamMembers: TeamMember[];
+  capacityConfig: CapacityConfig;
+  setCapacityConfig: React.Dispatch<React.SetStateAction<CapacityConfig>>;
+  
+  selectedDeveloperIds: string[];
+  setSelectedDeveloperIds: React.Dispatch<React.SetStateAction<string[]>>;
+  
+  selectedMilestoneId: string | null;
+  setSelectedMilestoneId: React.Dispatch<React.SetStateAction<string | null>>;
+  
+  selectedTeamMemberId: string | null;
+  setSelectedTeamMemberId: React.Dispatch<React.SetStateAction<string | null>>;
+
+  jsonText: string;
+  handleJsonChange: (val: string) => void;
+  jsonError: string | null;
+  copied: boolean;
+  copyJsonToClipboard: () => void;
+
+  handleAddMilestone: () => void;
+  handleDeleteMilestone: (id: string, e?: React.MouseEvent) => void;
+  handleUpdateMilestone: <K extends keyof Milestone>(id: string, key: K, value: Milestone[K]) => void;
+  handleMoveMilestone: (index: number, direction: 'up' | 'down') => void;
+
+  newAssigneeName: string;
+  setNewAssigneeName: (val: string) => void;
+  newAssigneeColor: string;
+  setNewAssigneeColor: (val: string) => void;
+  handleAddAssignee: (milestoneId: string) => void;
+  handleRemoveAssignee: (milestoneId: string, assigneeId: string) => void;
+
+  newMemberName: string;
+  setNewMemberName: (val: string) => void;
+  newMemberRole: string;
+  setNewMemberRole: (val: string) => void;
+  newMemberUtil: number;
+  setNewMemberUtil: (val: number) => void;
+  handleAddTeamMember: () => void;
+  handleUpdateTeamMember: <K extends keyof TeamMember>(id: string, key: K, value: TeamMember[K]) => void;
+  handleDeleteTeamMember: (id: string, e?: React.MouseEvent) => void;
+  handleMoveTeamMember: (index: number, direction: 'up' | 'down') => void;
+}
+
+export default function Sidebar({
+  appMode,
+  activeTab,
+  setActiveTab,
+  milestones,
+  config,
+  setConfig,
+  teamMembers,
+  capacityConfig,
+  setCapacityConfig,
+  selectedDeveloperIds,
+  setSelectedDeveloperIds,
+  selectedMilestoneId,
+  setSelectedMilestoneId,
+  selectedTeamMemberId,
+  setSelectedTeamMemberId,
+  jsonText,
+  handleJsonChange,
+  jsonError,
+  copied,
+  copyJsonToClipboard,
+  handleAddMilestone,
+  handleDeleteMilestone,
+  handleUpdateMilestone,
+  handleMoveMilestone,
+  newAssigneeName,
+  setNewAssigneeName,
+  newAssigneeColor,
+  setNewAssigneeColor,
+  handleAddAssignee,
+  handleRemoveAssignee,
+  newMemberName,
+  setNewMemberName,
+  newMemberRole,
+  setNewMemberRole,
+  newMemberUtil,
+  setNewMemberUtil,
+  handleAddTeamMember,
+  handleUpdateTeamMember,
+  handleDeleteTeamMember,
+  handleMoveTeamMember
+}: SidebarProps) {
+
+  const selectedMilestone = milestones.find(m => m.id === selectedMilestoneId);
+  const selectedTeamMember = teamMembers.find(m => m.id === selectedTeamMemberId);
+
+  return (
+    <section className="w-full lg:w-[460px] xl:w-[500px] border-b lg:border-b-0 lg:border-r border-slate-800 bg-slate-950 flex flex-col overflow-hidden shrink-0">
+      
+      {/* Editor Tabs Navigation */}
+      <div className="flex border-b border-slate-800 bg-slate-950/80 p-1.5 gap-1 shrink-0">
+        <button 
+          onClick={() => setActiveTab('editor')}
+          className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition flex items-center justify-center gap-2 ${
+            activeTab === 'editor' 
+              ? 'bg-slate-800 text-white shadow' 
+              : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
+          }`}
+        >
+          <Sliders className="w-3.5 h-3.5 text-indigo-400" />
+          Visual Editor
+        </button>
+        <button 
+          onClick={() => setActiveTab('json')}
+          className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition flex items-center justify-center gap-2 ${
+            activeTab === 'json' 
+              ? 'bg-slate-800 text-white shadow' 
+              : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
+          }`}
+        >
+          <Code className="w-3.5 h-3.5 text-indigo-400" />
+          JSON Data
+        </button>
+        <button 
+          onClick={() => setActiveTab('styles')}
+          className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition flex items-center justify-center gap-2 ${
+            activeTab === 'styles' 
+              ? 'bg-slate-800 text-white shadow' 
+              : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
+          }`}
+        >
+          <Layers className="w-3.5 h-3.5 text-indigo-400" />
+          Canvas Settings
+        </button>
+        <button 
+          onClick={() => setActiveTab('developers')}
+          className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition flex items-center justify-center gap-2 ${
+            activeTab === 'developers' 
+              ? 'bg-slate-800 text-white shadow' 
+              : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
+          }`}
+        >
+          <Users className="w-3.5 h-3.5 text-indigo-400" />
+          Developers
+        </button>
+      </div>
+
+      {/* Active Tab View */}
+      <div className="flex-grow overflow-y-auto p-5 space-y-6">
+        
+        {activeTab === 'editor' && (
+          <div className="space-y-6">
+            {appMode === 'roadmap' ? (
+              <>
+                {/* Milestone Node List Row Controllers */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">Roadmap Nodes</h2>
+                    <span className="text-xs text-slate-500 font-mono">{milestones.length} stages declared</span>
+                  </div>
+
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1 bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/80">
+                    {milestones.length === 0 ? (
+                      <div className="text-center py-6 text-slate-500 text-xs">
+                        No milestones yet. Click "+ Add New Milestone Button" below.
+                      </div>
+                    ) : (
+                      milestones.map((m, idx) => {
+                        const isFocused = m.id === selectedMilestoneId;
+                        return (
+                          <div 
+                            key={m.id}
+                            onClick={() => setSelectedMilestoneId(m.id)}
+                            className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer border transition ${
+                              isFocused 
+                                ? 'bg-indigo-950/25 border-indigo-500/40 text-white' 
+                                : 'bg-slate-900 hover:bg-slate-800/80 border-transparent text-slate-300'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${m.isHighlighted ? 'bg-red-500 ring-2 ring-red-500/30' : 'bg-[#1a235a]'}`} />
+                              <span className="font-semibold text-xs truncate max-w-[140px] sm:max-w-[210px]">{m.title || '(Untitled Stage)'}</span>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition">
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handleMoveMilestone(idx, 'up'); }}
+                                disabled={idx === 0}
+                                className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-slate-800"
+                                title="Move Rank Up"
+                              >
+                                <ArrowUp className="w-3.5 h-3.5" />
+                              </button>
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handleMoveMilestone(idx, 'down'); }}
+                                disabled={idx === milestones.length - 1}
+                                className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-slate-800"
+                                title="Move Rank Down"
+                              >
+                                <ArrowDown className="w-3.5 h-3.5" />
+                              </button>
+                              <button 
+                                onClick={(e) => handleDeleteMilestone(m.id, e)}
+                                className="p-1 hover:text-rose-400 rounded hover:bg-slate-800 text-slate-500"
+                                title="Delete Milestone"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  <button 
+                    onClick={handleAddMilestone}
+                    className="mt-3 w-full py-2 px-3 bg-indigo-650 hover:bg-indigo-550 active:scale-98 transition rounded-xl font-bold text-xs text-center text-white flex items-center justify-center gap-1.5 shadow"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add New Milestone Node
+                  </button>
+                </div>
+
+                {/* Focus Item Detail Configuration Form Panel */}
+                {selectedMilestone ? (
+                  <div className="border border-slate-800 bg-slate-900/60 p-4 rounded-xl space-y-4 shadow-sm font-sans">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="p-1 rounded bg-slate-800 text-indigo-400 font-mono text-[9px] uppercase tracking-wider font-bold">CONFIGURING</span>
+                        <h3 className="font-bold text-xs text-white truncate max-w-[180px]">{selectedMilestone.title}</h3>
+                      </div>
+                      <button 
+                        onClick={(e) => handleDeleteMilestone(selectedMilestone.id, e)}
+                        className="text-rose-400 hover:text-rose-300 text-xs flex items-center gap-1 font-semibold"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Delete Stage
+                      </button>
+                    </div>
+
+                    {/* Form Controls */}
+                    <div className="space-y-3">
+                      
+                      {/* Main Title & Subtitle */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Title</label>
+                          <input 
+                            type="text"
+                            value={selectedMilestone.title}
+                            onChange={(e) => handleUpdateMilestone(selectedMilestone.id, 'title', e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                            placeholder="Sprint Stage"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Subtitle / Date Range</label>
+                          <input 
+                            type="text"
+                            value={selectedMilestone.subtitle}
+                            onChange={(e) => handleUpdateMilestone(selectedMilestone.id, 'subtitle', e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                            placeholder="[20-25 June]"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Icon Selector list */}
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase">Stage Node Icon Class</label>
+                        <div className="grid grid-cols-6 gap-1 bg-slate-950 p-1.5 rounded-lg border border-slate-800/80">
+                          {(['lock', 'traffic-light', 'warning', 'clipboard', 'check', 'sparkles'] as IconType[]).map((icon) => (
+                            <button
+                              key={icon}
+                              type="button"
+                              onClick={() => handleUpdateMilestone(selectedMilestone.id, 'icon', icon)}
+                              className={`py-1.5 rounded flex items-center justify-center text-xs font-semibold capitalize border transition ${
+                                selectedMilestone.icon === icon 
+                                  ? 'bg-slate-800 border-indigo-500/50 text-indigo-400' 
+                                  : 'border-transparent text-slate-400 hover:bg-slate-900/60'
+                              }`}
+                              title={icon}
+                            >
+                              <span className="text-[10px] font-mono">{icon.substring(0, 4)}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Custom State colors */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">State Status Text</label>
+                          <input 
+                            type="text"
+                            value={selectedMilestone.status}
+                            onChange={(e) => handleUpdateMilestone(selectedMilestone.id, 'status', e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Preset Theme status color</label>
+                          <select
+                            value={selectedMilestone.statusBg + '|' + selectedMilestone.statusText}
+                            onChange={(e) => {
+                              const [bg, text] = e.target.value.split('|');
+                              handleUpdateMilestone(selectedMilestone.id, 'statusBg', bg);
+                              handleUpdateMilestone(selectedMilestone.id, 'statusText', text);
+                            }}
+                            className="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-2 text-xs text-white focus:outline-none"
+                          >
+                            {STATUS_COLORS.map((col) => (
+                              <option key={col.bg} value={col.bg + '|' + col.text}>{col.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Connector Highlighting */}
+                      <div className="flex items-center gap-4 py-1">
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                          <input 
+                            type="checkbox"
+                            checked={selectedMilestone.isHighlighted}
+                            onChange={(e) => handleUpdateMilestone(selectedMilestone.id, 'isHighlighted', e.target.checked)}
+                            className="w-4 h-4 text-indigo-600 bg-slate-950 border-slate-800 rounded focus:ring-indigo-500"
+                          />
+                          <span className="text-[10px] font-bold text-slate-350 uppercase">Highlight Node (Red Line Connector Accent)</span>
+                        </label>
+
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                          <input 
+                            type="checkbox"
+                            checked={selectedMilestone.hideStatus || false}
+                            onChange={(e) => handleUpdateMilestone(selectedMilestone.id, 'hideStatus', e.target.checked)}
+                            className="w-4 h-4 text-indigo-600 bg-slate-950 border-slate-800 rounded focus:ring-indigo-500"
+                          />
+                          <span className="text-[10px] font-bold text-slate-350 uppercase">Hide Status Badge</span>
+                        </label>
+                      </div>
+
+                      {/* Owner Badges Assignee Area */}
+                      <div className="border-t border-slate-800/80 pt-3 space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase">Assigned Badges ({selectedMilestone.assignees.length})</span>
+                        </div>
+
+                        {/* List current assignees */}
+                        <div className="flex flex-wrap gap-1.5">
+                          {selectedMilestone.assignees.length === 0 ? (
+                            <span className="text-[10px] text-slate-500 italic">No resource badges attached to node</span>
+                          ) : (
+                            selectedMilestone.assignees.map((assignee) => (
+                              <div 
+                                key={assignee.id}
+                                className="px-2.5 py-1 rounded-lg text-xs font-semibold text-white flex items-center shadow"
+                                style={{ backgroundColor: assignee.color }}
+                              >
+                                <span>{assignee.name}</span>
+                                <button 
+                                  onClick={() => handleRemoveAssignee(selectedMilestone.id, assignee.id)}
+                                  className="hover:bg-black/20 rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold text-[10px] ml-1 transition"
+                                  title="Unassign"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ))
+                          )}
+                        </div>
+
+                        {/* Add Assignee Input Panel */}
+                        <div className="p-2.5 bg-slate-950/70 border border-slate-800 rounded-xl space-y-2">
+                          <p className="text-[10px] text-slate-400 font-bold">New Owner Badge Setup</p>
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <select 
+                              value={newAssigneeName}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setNewAssigneeName(val);
+                                const devIndex = teamMembers.findIndex(m => m.name === val);
+                                if (devIndex !== -1) {
+                                  setNewAssigneeColor(ASSIGNEE_COLORS[devIndex % ASSIGNEE_COLORS.length].value);
+                                }
+                              }}
+                              className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                            >
+                              <option value="">Select Developer...</option>
+                              {teamMembers.map((m) => (
+                                <option key={m.id} value={m.name}>{m.name}</option>
+                              ))}
+                            </select>
+                            <div className="flex gap-1.5 items-center">
+                              <select 
+                                value={newAssigneeColor}
+                                onChange={(e) => setNewAssigneeColor(e.target.value)}
+                                className="bg-slate-900 border border-slate-800 rounded-lg py-1 px-1.5 text-xs text-white"
+                              >
+                                {ASSIGNEE_COLORS.map((c) => (
+                                  <option key={c.value} value={c.value}>{c.name}</option>
+                                ))}
+                              </select>
+                              <button
+                                type="button"
+                                onClick={() => handleAddAssignee(selectedMilestone.id)}
+                                className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-xs font-bold text-white whitespace-nowrap active:scale-95 transition"
+                              >
+                                Assign
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Quick color circles preview */}
+                          <div className="flex gap-1.5 items-center pt-1 overflow-x-auto">
+                            <span className="text-[9px] text-slate-500 uppercase font-bold mr-1">Palette:</span>
+                            {ASSIGNEE_COLORS.map((col) => (
+                              <button
+                                key={col.value}
+                                type="button"
+                                onClick={() => setNewAssigneeColor(col.value)}
+                                className={`w-3.5 h-3.5 rounded-full border transition flex justify-center items-center ${
+                                  newAssigneeColor === col.value ? 'border-white scale-125 ring-2 ring-indigo-500/30' : 'border-transparent'
+                                }`}
+                                style={{ backgroundColor: col.value }}
+                                title={col.name}
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                      </div>
+
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-slate-900/40 p-6 rounded-xl border border-slate-800 text-center text-slate-400 text-xs">
+                    Please insert or select a Milestone Node above to view block configuration form.
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Select Developers */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">Select Developers</h2>
+                    <span className="text-xs text-slate-500 font-mono">{selectedDeveloperIds.length} of {teamMembers.length} selected</span>
+                  </div>
+
+                  <div className="space-y-2 bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/80 max-h-[60vh] overflow-y-auto">
+                    {teamMembers.length === 0 ? (
+                      <div className="text-center py-6 text-slate-500 text-xs">
+                        No developers found. Go to the "Developers" tab to add them.
+                      </div>
+                    ) : (
+                      teamMembers.map((member) => {
+                        const isChecked = selectedDeveloperIds.includes(member.id);
+                        return (
+                          <label 
+                            key={member.id}
+                            className="flex items-center gap-3 p-2.5 rounded-lg cursor-pointer bg-slate-900 hover:bg-slate-850 border border-slate-800 transition"
+                          >
+                            <input 
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => {
+                                if (isChecked) {
+                                  setSelectedDeveloperIds(selectedDeveloperIds.filter(id => id !== member.id));
+                                } else {
+                                  setSelectedDeveloperIds([...selectedDeveloperIds, member.id]);
+                                }
+                              }}
+                              className="w-4 h-4 text-indigo-600 bg-slate-950 border-slate-800 rounded focus:ring-indigo-500 focus:ring-2 focus:ring-offset-slate-900 cursor-pointer"
+                            />
+                            <div className="flex-grow">
+                              <p className="font-semibold text-xs text-slate-200">{member.name}</p>
+                              <p className="text-[9px] text-slate-400 uppercase tracking-wider font-bold">{member.role}</p>
+                            </div>
+                            <span className="text-xs font-mono font-bold text-slate-400">{member.utilization}%</span>
+                          </label>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'json' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">Interactive JSON Config</h2>
+              <button
+                onClick={copyJsonToClipboard}
+                className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-semibold bg-transparent border-0 cursor-pointer"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? 'Copied' : 'Copy Configuration'}
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-400">
+              Update your dataset in real-time by modifying the code content below. You can also paste your own exported layout dataset.
+            </p>
+
+            <div className="relative">
+              <textarea
+                value={jsonText}
+                onChange={(e) => handleJsonChange(e.target.value)}
+                className="w-full h-80 bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-300 focus:outline-none focus:border-indigo-500 transition"
+                style={{ resize: 'vertical' }}
+                placeholder="{ ... }"
+              />
+              {jsonError && (
+                <div className="mt-2 p-2.5 bg-rose-950/40 text-rose-300 rounded-lg text-xs font-mono border border-rose-500/20">
+                  ⚠️ {jsonError}
+                </div>
+              )}
+            </div>
+
+            <div className="p-3 bg-slate-900/60 rounded-xl border border-slate-800/80 text-[11px] text-slate-400 leading-relaxed">
+              <span className="font-semibold text-white">How to import:</span> Make sure your JSON keeps the structure of <code>config</code> (with fields title, timelineColor, canvasBg, cardBg, cardBorder) and <code>milestones</code> (with arrays of objects holding id, title, subtitle, icon, status, statusBg, statusText, isHighlighted, assignees).
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'styles' && (
+          <div className="space-y-4">
+            <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">Style &amp; Appearance</h2>
+            
+            {/* Title */}
+            <div className="space-y-1">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase">Roadmap Main Header Title</label>
+              <input 
+                type="text"
+                value={config.title}
+                onChange={(e) => setConfig({ ...config, title: e.target.value })}
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                placeholder="MILESTONE ROADMAP"
+              />
+            </div>
+
+            {/* Timeline axis line color */}
+            <div className="space-y-1">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase">Timeline Axis Color</label>
+              <div className="flex gap-2">
+                <input 
+                  type="color"
+                  value={config.timelineColor}
+                  onChange={(e) => setConfig({ ...config, timelineColor: e.target.value })}
+                  className="w-10 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
+                />
+                <input 
+                  type="text"
+                  value={config.timelineColor}
+                  onChange={(e) => setConfig({ ...config, timelineColor: e.target.value })}
+                  className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+                />
+              </div>
+            </div>
+
+            {/* Canvas background selector */}
+            <div className="space-y-1">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase">Preview Canvas Grid Layout</label>
+              <div className="grid grid-cols-2 gap-2">
+                {['light', 'grid', 'dark', 'slate'].map((bg) => (
+                  <button
+                    key={bg}
+                    type="button"
+                    onClick={() => setConfig({ ...config, canvasBg: bg as any })}
+                    className={`py-1.5 rounded-lg border text-xs capitalize transition ${
+                      config.canvasBg === bg 
+                        ? 'bg-slate-800 border-indigo-500/50 text-indigo-400' 
+                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {bg}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Card Background Color picker */}
+            <div className="space-y-1">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase">Card Frame Fill Color</label>
+              <div className="flex gap-2">
+                <input 
+                  type="color"
+                  value={config.cardBg}
+                  onChange={(e) => setConfig({ ...config, cardBg: e.target.value })}
+                  className="w-10 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
+                />
+                <input 
+                  type="text"
+                  value={config.cardBg}
+                  onChange={(e) => setConfig({ ...config, cardBg: e.target.value })}
+                  className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-3 text-xs text-white font-mono"
+                />
+              </div>
+            </div>
+
+            {/* Card Border Customization */}
+            <div className="space-y-1">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase">Card Outer Outline Border Color</label>
+              <div className="flex gap-2">
+                <input 
+                  type="color"
+                  value={config.cardBorder}
+                  onChange={(e) => setConfig({ ...config, cardBorder: e.target.value })}
+                  className="w-10 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
+                />
+                <input 
+                  type="text"
+                  value={config.cardBorder}
+                  onChange={(e) => setConfig({ ...config, cardBorder: e.target.value })}
+                  className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-3 text-xs text-white font-mono"
+                />
+              </div>
+            </div>
+
+            {/* Hide Status Pills Option */}
+            <div className="space-y-1.5 pt-1">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase">Status Badge Visibility</label>
+              <div className="flex items-center">
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={config.hideStatus || false}
+                    onChange={(e) => setConfig({ ...config, hideStatus: e.target.checked })}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 peer-checked:after:bg-white"></div>
+                  <span className="ml-2 text-xs text-slate-300 font-medium">
+                    {config.hideStatus ? 'Status pills hidden from view/export' : 'Status pills visible on cards'}
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'developers' && (
+          <div className="space-y-6">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">Developers</h2>
+                <span className="text-xs text-slate-500 font-mono">{teamMembers.length} engineers</span>
+              </div>
+
+              <div className="space-y-2 max-h-48 overflow-y-auto pr-1 bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/80">
+                {teamMembers.length === 0 ? (
+                  <div className="text-center py-6 text-slate-500 text-xs">
+                    No team members yet. Click "+ Add New Teammate" below.
+                  </div>
+                ) : (
+                  teamMembers.map((member, idx) => {
+                    const isFocused = member.id === selectedTeamMemberId;
+                    let statusColor = 'bg-teal-500 ring-teal-500/20';
+                    if (member.utilization >= capacityConfig.orangeThreshold) {
+                      statusColor = 'bg-rose-500 ring-rose-500/20';
+                    } else if (member.utilization >= capacityConfig.greenThreshold) {
+                      statusColor = 'bg-amber-500 ring-amber-500/20';
+                    }
+                    return (
+                      <div 
+                        key={member.id}
+                        onClick={() => setSelectedTeamMemberId(member.id)}
+                        className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer border transition ${
+                          isFocused 
+                            ? 'bg-indigo-950/25 border-indigo-500/40 text-white' 
+                            : 'bg-slate-900 hover:bg-slate-800/80 border-transparent text-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${statusColor} ring-2`} />
+                          <div className="truncate">
+                            <p className="font-semibold text-xs truncate max-w-[140px] text-slate-200">{member.name}</p>
+                            <p className="text-[9px] text-slate-400 uppercase tracking-wider font-bold truncate max-w-[145px]">{member.role}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition">
+                          <span className="text-[11px] font-mono font-bold mr-2 text-slate-400">{member.utilization}%</span>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); handleMoveTeamMember(idx, 'up'); }}
+                            disabled={idx === 0}
+                            className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-slate-800 text-slate-400 bg-transparent border-0 cursor-pointer"
+                            title="Move Rank Up"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); handleMoveTeamMember(idx, 'down'); }}
+                            disabled={idx === teamMembers.length - 1}
+                            className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-slate-800 text-slate-400 bg-transparent border-0 cursor-pointer"
+                            title="Move Rank Down"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={(e) => handleDeleteTeamMember(member.id, e)}
+                            className="p-1 hover:text-rose-400 rounded hover:bg-slate-800 text-slate-500 bg-transparent border-0 cursor-pointer"
+                            title="Delete Member"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Focused Teammate Detail Form Editor */}
+            {selectedTeamMember ? (
+              <div className="border border-slate-800 bg-slate-900/60 p-4 rounded-xl space-y-4 shadow-sm font-sans">
+                <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="p-1 rounded bg-slate-800 text-rose-400 font-mono text-[9px] uppercase tracking-wider font-bold">EDITING TEAM</span>
+                    <h3 className="font-bold text-xs text-white truncate max-w-[180px]">
+                      {selectedTeamMember.name}
+                    </h3>
+                  </div>
+                  <button 
+                    onClick={(e) => handleDeleteTeamMember(selectedTeamMember.id, e)}
+                    className="text-rose-400 hover:text-rose-300 text-xs flex items-center gap-1 font-semibold bg-transparent border-0 cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Delete Profile
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Name</label>
+                      <input 
+                        type="text"
+                        value={selectedTeamMember.name}
+                        onChange={(e) => handleUpdateTeamMember(selectedTeamMember.id, 'name', e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                        placeholder="e.g. Ronak"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Role</label>
+                      <select 
+                        value={selectedTeamMember.role}
+                        onChange={(e) => handleUpdateTeamMember(selectedTeamMember.id, 'role', e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                      >
+                        <option value="Specialist">Specialist</option>
+                        <option value="Associate">Associate</option>
+                        <option value="Lead">Lead</option>
+                        <option value="Manager">Manager</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase mb-1">
+                      <span>Utilization</span>
+                      <span className="text-white font-mono">{selectedTeamMember.utilization}%</span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="0" 
+                      max="150" 
+                      step="5"
+                      value={selectedTeamMember.utilization} 
+                      onChange={(e) => handleUpdateTeamMember(selectedTeamMember.id, 'utilization', parseInt(e.target.value, 10))}
+                      className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-6 text-slate-500 text-xs bg-slate-900/20 border border-dashed border-slate-800 rounded-xl">
+                Select a developer from the list above to edit their details.
+              </div>
+            )}
+
+            {/* Quick Add Teammate Card */}
+            <div className="p-4 bg-slate-900/40 border border-slate-800/80 rounded-xl space-y-3">
+              <h3 className="text-xs font-bold text-slate-300">Quick Add Member</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <input 
+                  type="text" 
+                  placeholder="Name" 
+                  value={newMemberName} 
+                  onChange={(e) => setNewMemberName(e.target.value)}
+                  className="bg-slate-950 border border-slate-800 rounded-lg py-1 px-2.5 text-xs text-white focus:outline-none"
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleAddTeamMember(); }}
+                />
+                <select 
+                  value={newMemberRole} 
+                  onChange={(e) => setNewMemberRole(e.target.value)}
+                  className="bg-slate-950 border border-slate-800 rounded-lg py-1 px-1.5 text-xs text-white focus:outline-none"
+                >
+                  <option value="Associate">Associate</option>
+                  <option value="Specialist">Specialist</option>
+                  <option value="Lead">Lead</option>
+                  <option value="Manager">Manager</option>
+                </select>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-slate-400">Default Util: {newMemberUtil}%</span>
+                <button 
+                  onClick={handleAddTeamMember}
+                  className="px-3 py-1 bg-[#be185d] hover:bg-[#9d174d] rounded-lg text-xs font-bold text-white transition active:scale-95"
+                >
+                  Add Teammate
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Prompt/Instructions Area */}
+      <div className="p-4 border-t border-slate-800 bg-slate-950/90 text-[11px] text-slate-400 space-y-2 shrink-0">
+        <div className="flex gap-1.5 items-start text-indigo-300">
+          <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+          <p className="font-semibold text-slate-300">Figma-Ready Assets</p>
+        </div>
+        <p className="leading-relaxed">
+          Every detail is drawn with pure client-side vectors. Clicking <strong className="text-white">Export Vector SVG</strong> saves an infinitely-scalable vector asset ready for directly dropping into presentation slides or design files.
+        </p>
+      </div>
+    </section>
+  );
+}
