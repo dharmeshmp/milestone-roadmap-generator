@@ -121,6 +121,9 @@ export default function Sidebar({
   const [newTicketStatusLocal, setNewTicketStatusLocal] = React.useState<'To Do' | 'In Progress' | 'Done'>('To Do');
   const [newTicketRemarkLocal, setNewTicketRemarkLocal] = React.useState('');
   const [newTicketHoursLocal, setNewTicketHoursLocal] = React.useState(0);
+  const [newTicketDateLocal, setNewTicketDateLocal] = React.useState(() => {
+    return new Date().toISOString().split('T')[0];
+  });
 
   return (
     <section className="w-full lg:w-[460px] xl:w-[500px] border-b lg:border-b-0 lg:border-r border-slate-800 bg-slate-950 flex flex-col overflow-hidden shrink-0">
@@ -347,7 +350,13 @@ export default function Sidebar({
                       <option value="Done">Done</option>
                     </select>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <input 
+                      type="date" 
+                      value={newTicketDateLocal} 
+                      onChange={(e) => setNewTicketDateLocal(e.target.value)}
+                      className="bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none font-mono"
+                    />
                     <input 
                       type="number" 
                       placeholder="Hours (e.g. 4.0)" 
@@ -355,14 +364,16 @@ export default function Sidebar({
                       min="0"
                       value={newTicketHoursLocal || ''} 
                       onChange={(e) => setNewTicketHoursLocal(parseFloat(e.target.value) || 0)}
-                      className="w-1/3 bg-slate-950 border border-slate-855 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none font-mono"
+                      className="bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none font-mono"
                     />
+                  </div>
+                  <div>
                     <input 
                       type="text" 
                       placeholder="Status remarks..." 
                       value={newTicketRemarkLocal} 
                       onChange={(e) => setNewTicketRemarkLocal(e.target.value)}
-                      className="w-2/3 bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none"
+                      className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none"
                     />
                   </div>
                   <button 
@@ -373,7 +384,7 @@ export default function Sidebar({
                         title: newTicketTitleLocal.trim(),
                         assignee_id: newTicketAssigneeLocal || null,
                         status: newTicketStatusLocal,
-                        date: selectedDate,
+                        date: newTicketDateLocal,
                         remark: newTicketRemarkLocal.trim(),
                         timelog: newTicketHoursLocal
                       });
@@ -382,6 +393,7 @@ export default function Sidebar({
                       setNewTicketAssigneeLocal('');
                       setNewTicketRemarkLocal('');
                       setNewTicketHoursLocal(0);
+                      setNewTicketDateLocal(new Date().toISOString().split('T')[0]);
                     }}
                     className="w-full py-2 bg-indigo-650 hover:bg-indigo-550 active:scale-98 transition rounded-xl font-bold text-xs text-center text-white flex items-center justify-center gap-1.5 shadow"
                   >
