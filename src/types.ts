@@ -44,3 +44,13 @@ export interface CapacityConfig {
   orangeThreshold: number; // typically 90
 }
 
+export interface JiraTicket {
+  id: string;
+  title: string;
+  assignee_id: string | null;
+  date: string; // YYYY-MM-DD
+  status: 'To Do' | 'In Progress' | 'Done';
+  remark: string;
+  timelog: number; // in hours
+}
+

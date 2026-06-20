@@ -35,6 +35,9 @@ db.exec(`
     title TEXT NOT NULL,
     status TEXT NOT NULL,
     assignee_id TEXT,
+    date TEXT NOT NULL,
+    remark TEXT DEFAULT '',
+    timelog REAL DEFAULT 0.0,
     FOREIGN KEY(assignee_id) REFERENCES developers(id) ON DELETE SET NULL
   );
 `);
@@ -68,6 +71,18 @@ if (countMilestones.count === 0) {
       idx + 1
     );
   });
+}
+
+// Seed initial tickets if empty
+const countTickets = db.prepare('SELECT COUNT(*) as count FROM jira_tickets').get() as { count: number };
+if (countTickets.count === 0) {
+  const insert = db.prepare('INSERT INTO jira_tickets (id, title, status, assignee_id, date, remark, timelog) VALUES (?, ?, ?, ?, ?, ?, ?)');
+  // Get current date string YYYY-MM-DD
+  const today = new Date().toISOString().split('T')[0];
+  insert.run('JIRA-101', 'Implement new login flows', 'In Progress', 'tm-1', today, 'Auth tokens are integrated', 4.5);
+  insert.run('JIRA-102', 'Profile page redesign', 'To Do', 'tm-2', today, 'Awaiting UI asset designs', 0);
+  insert.run('JIRA-103', 'Database backup cron setup', 'Done', 'tm-3', today, 'Completed backup testing successfully', 3.0);
+  insert.run('JIRA-104', 'Fix memory leaks in render pipeline', 'In Progress', 'tm-4', today, 'Profiling memory footprint', 6.0);
 }
 
 export default db;

@@ -18,7 +18,7 @@ import {
   Layers,
   Users
 } from 'lucide-react';
-import { Milestone, RoadmapConfig, TeamMember, CapacityConfig, IconType } from '../types';
+import { Milestone, RoadmapConfig, TeamMember, CapacityConfig, IconType, JiraTicket } from '../types';
 
 // Color Presets for assignees
 export const ASSIGNEE_COLORS = [
@@ -43,7 +43,7 @@ export const STATUS_COLORS = [
 ];
 
 interface SidebarProps {
-  appMode: 'roadmap' | 'capacity';
+  appMode: 'roadmap' | 'capacity' | 'tickets';
   activeTab: 'editor' | 'styles';
   setActiveTab: (tab: 'editor' | 'styles') => void;
   
@@ -70,6 +70,14 @@ interface SidebarProps {
   setNewAssigneeName: (val: string) => void;
   handleAddAssignee: (milestoneId: string) => void;
   handleRemoveAssignee: (milestoneId: string, assigneeId: string) => void;
+
+  tickets: JiraTicket[];
+  selectedTicketId: string | null;
+  setSelectedTicketId: (id: string | null) => void;
+  handleAddTicket: (ticket: JiraTicket) => void;
+  handleDeleteTicket: (id: string) => void;
+  handleUpdateTicket: <K extends keyof JiraTicket>(id: string, key: K, value: JiraTicket[K]) => void;
+  selectedDate: string;
 }
 
 export default function Sidebar({
@@ -93,10 +101,26 @@ export default function Sidebar({
   newAssigneeName,
   setNewAssigneeName,
   handleAddAssignee,
-  handleRemoveAssignee
+  handleRemoveAssignee,
+  tickets,
+  selectedTicketId,
+  setSelectedTicketId,
+  handleAddTicket,
+  handleDeleteTicket,
+  handleUpdateTicket,
+  selectedDate
 }: SidebarProps) {
 
   const selectedMilestone = milestones.find(m => m.id === selectedMilestoneId);
+  const selectedTicket = tickets.find(t => t.id === selectedTicketId);
+
+  // Local state for JIRA tickets logging form
+  const [newTicketIdLocal, setNewTicketIdLocal] = React.useState('');
+  const [newTicketTitleLocal, setNewTicketTitleLocal] = React.useState('');
+  const [newTicketAssigneeLocal, setNewTicketAssigneeLocal] = React.useState('');
+  const [newTicketStatusLocal, setNewTicketStatusLocal] = React.useState<'To Do' | 'In Progress' | 'Done'>('To Do');
+  const [newTicketRemarkLocal, setNewTicketRemarkLocal] = React.useState('');
+  const [newTicketHoursLocal, setNewTicketHoursLocal] = React.useState(0);
 
   return (
     <section className="w-full lg:w-[460px] xl:w-[500px] border-b lg:border-b-0 lg:border-r border-slate-800 bg-slate-950 flex flex-col overflow-hidden shrink-0">
@@ -132,7 +156,241 @@ export default function Sidebar({
         
         {activeTab === 'editor' && (
           <div className="space-y-6">
-            {appMode === 'roadmap' ? (
+            {appMode === 'tickets' ? (
+              <>
+                {/* Tickets list for selected date */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">Daily Activities</h2>
+                    <span className="text-xs text-slate-500 font-mono">
+                      {tickets.filter(t => t.date === selectedDate).length} tasks
+                    </span>
+                  </div>
+
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1 bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/80">
+                    {tickets.filter(t => t.date === selectedDate).length === 0 ? (
+                      <div className="text-center py-6 text-slate-500 text-xs">
+                        No JIRA tickets for today. Add a ticket below.
+                      </div>
+                    ) : (
+                      tickets.filter(t => t.date === selectedDate).map((ticket) => {
+                        const isFocused = ticket.id === selectedTicketId;
+                        return (
+                          <div 
+                            key={ticket.id}
+                            onClick={() => setSelectedTicketId(ticket.id)}
+                            className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer border transition ${
+                              isFocused 
+                                ? 'bg-indigo-950/25 border-indigo-500/40 text-white' 
+                                : 'bg-slate-900 hover:bg-slate-800/80 border-transparent text-slate-350'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="text-[10px] font-bold font-mono text-slate-400 shrink-0">
+                                {ticket.id}
+                              </span>
+                              <span className="font-semibold text-xs truncate max-w-[150px]">
+                                {ticket.title}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition">
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handleDeleteTicket(ticket.id); }}
+                                className="p-1 hover:text-rose-450 rounded hover:bg-slate-800 text-slate-500 bg-transparent border-0 cursor-pointer"
+                                title="Delete Ticket"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+
+                {/* Edit Form */}
+                {selectedTicket ? (
+                  <div className="border border-slate-850 bg-slate-900/50 p-4 rounded-xl space-y-4 shadow-sm font-sans">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="p-1 rounded bg-slate-800 text-indigo-400 font-mono text-[9px] uppercase tracking-wider font-bold">TICKET</span>
+                        <h3 className="font-bold text-xs text-white truncate max-w-[150px]">{selectedTicket.id}</h3>
+                      </div>
+                      <button 
+                        onClick={() => handleDeleteTicket(selectedTicket.id)}
+                        className="text-rose-450 hover:text-rose-400 text-xs flex items-center gap-1 font-semibold bg-transparent border-0 cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Delete Task
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Activity Title</label>
+                        <input 
+                          type="text"
+                          value={selectedTicket.title}
+                          onChange={(e) => handleUpdateTicket(selectedTicket.id, 'title', e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Assignee</label>
+                          <select 
+                            value={selectedTicket.assignee_id || ''}
+                            onChange={(e) => handleUpdateTicket(selectedTicket.id, 'assignee_id', e.target.value || null)}
+                            className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none"
+                          >
+                            <option value="">Unassigned</option>
+                            {teamMembers.map((m) => (
+                              <option key={m.id} value={m.id}>{m.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Status</label>
+                          <select 
+                            value={selectedTicket.status}
+                            onChange={(e) => handleUpdateTicket(selectedTicket.id, 'status', e.target.value as any)}
+                            className="w-full bg-slate-950 border border-slate-855 rounded-lg py-1.5 px-2 text-xs text-white focus:outline-none"
+                          >
+                            <option value="To Do">To Do</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Done">Done</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Log Hours</label>
+                          <input 
+                            type="number"
+                            step="0.5"
+                            min="0"
+                            max="24"
+                            value={selectedTicket.timelog}
+                            onChange={(e) => handleUpdateTicket(selectedTicket.id, 'timelog', parseFloat(e.target.value) || 0)}
+                            className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none font-mono"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Date</label>
+                          <input 
+                            type="date"
+                            value={selectedTicket.date}
+                            onChange={(e) => handleUpdateTicket(selectedTicket.id, 'date', e.target.value)}
+                            className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2 text-xs text-white focus:outline-none font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Remark / Progress Comments</label>
+                        <textarea 
+                          rows={2}
+                          value={selectedTicket.remark}
+                          onChange={(e) => handleUpdateTicket(selectedTicket.id, 'remark', e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none resize-none"
+                          placeholder="Daily updates..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-slate-900/40 p-6 rounded-xl border border-slate-800 text-center text-slate-400 text-xs">
+                    Please select a Ticket above to configure details or log hours.
+                  </div>
+                )}
+
+                {/* Quick Add Ticket Card */}
+                <div className="p-4 bg-slate-900/40 border border-slate-850 rounded-xl space-y-3">
+                  <h3 className="text-xs font-bold text-slate-350">Quick Log New Ticket</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Ticket Key (e.g. JIRA-105)" 
+                      value={newTicketIdLocal} 
+                      onChange={(e) => setNewTicketIdLocal(e.target.value.toUpperCase())}
+                      className="bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none font-mono"
+                    />
+                    <input 
+                      type="text" 
+                      placeholder="Activity Title" 
+                      value={newTicketTitleLocal} 
+                      onChange={(e) => setNewTicketTitleLocal(e.target.value)}
+                      className="bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <select 
+                      value={newTicketAssigneeLocal} 
+                      onChange={(e) => setNewTicketAssigneeLocal(e.target.value)}
+                      className="bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-1.5 text-xs text-white focus:outline-none"
+                    >
+                      <option value="">Select Assignee...</option>
+                      {teamMembers.map((m) => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                    </select>
+                    <select 
+                      value={newTicketStatusLocal} 
+                      onChange={(e) => setNewTicketStatusLocal(e.target.value as any)}
+                      className="bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-1.5 text-xs text-white focus:outline-none"
+                    >
+                      <option value="To Do">To Do</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Done">Done</option>
+                    </select>
+                  </div>
+                  <div className="flex gap-2">
+                    <input 
+                      type="number" 
+                      placeholder="Hours (e.g. 4.0)" 
+                      step="0.5"
+                      min="0"
+                      value={newTicketHoursLocal || ''} 
+                      onChange={(e) => setNewTicketHoursLocal(parseFloat(e.target.value) || 0)}
+                      className="w-1/3 bg-slate-950 border border-slate-855 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none font-mono"
+                    />
+                    <input 
+                      type="text" 
+                      placeholder="Status remarks..." 
+                      value={newTicketRemarkLocal} 
+                      onChange={(e) => setNewTicketRemarkLocal(e.target.value)}
+                      className="w-2/3 bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+                  <button 
+                    onClick={() => {
+                      if (!newTicketIdLocal.trim() || !newTicketTitleLocal.trim()) return;
+                      handleAddTicket({
+                        id: newTicketIdLocal.trim(),
+                        title: newTicketTitleLocal.trim(),
+                        assignee_id: newTicketAssigneeLocal || null,
+                        status: newTicketStatusLocal,
+                        date: selectedDate,
+                        remark: newTicketRemarkLocal.trim(),
+                        timelog: newTicketHoursLocal
+                      });
+                      setNewTicketIdLocal('');
+                      setNewTicketTitleLocal('');
+                      setNewTicketAssigneeLocal('');
+                      setNewTicketRemarkLocal('');
+                      setNewTicketHoursLocal(0);
+                    }}
+                    className="w-full py-2 bg-indigo-650 hover:bg-indigo-550 active:scale-98 transition rounded-xl font-bold text-xs text-center text-white flex items-center justify-center gap-1.5 shadow"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Log Ticket Daily Task
+                  </button>
+                </div>
+              </>
+            ) : appMode === 'roadmap' ? (
               <>
                 {/* Milestone Node List Row Controllers */}
                 <div>
@@ -156,7 +414,7 @@ export default function Sidebar({
                             className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer border transition ${
                               isFocused 
                                 ? 'bg-indigo-950/25 border-indigo-500/40 text-white' 
-                                : 'bg-slate-900 hover:bg-slate-800/80 border-transparent text-slate-300'
+                                : 'bg-slate-900 hover:bg-slate-800/80 border-transparent text-slate-350'
                             }`}
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
@@ -168,7 +426,7 @@ export default function Sidebar({
                               <button 
                                 onClick={(e) => { e.stopPropagation(); handleMoveMilestone(idx, 'up'); }}
                                 disabled={idx === 0}
-                                className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-slate-800"
+                                className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-slate-800 text-slate-400 bg-transparent border-0 cursor-pointer"
                                 title="Move Rank Up"
                               >
                                 <ArrowUp className="w-3.5 h-3.5" />
@@ -176,14 +434,14 @@ export default function Sidebar({
                               <button 
                                 onClick={(e) => { e.stopPropagation(); handleMoveMilestone(idx, 'down'); }}
                                 disabled={idx === milestones.length - 1}
-                                className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-slate-800"
+                                className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-slate-800 text-slate-400 bg-transparent border-0 cursor-pointer"
                                 title="Move Rank Down"
                               >
                                 <ArrowDown className="w-3.5 h-3.5" />
                               </button>
                               <button 
                                 onClick={(e) => handleDeleteMilestone(m.id, e)}
-                                className="p-1 hover:text-rose-400 rounded hover:bg-slate-800 text-slate-500"
+                                className="p-1 hover:text-rose-450 rounded hover:bg-slate-800 text-slate-500 bg-transparent border-0 cursor-pointer"
                                 title="Delete Milestone"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -214,7 +472,7 @@ export default function Sidebar({
                       </div>
                       <button 
                         onClick={(e) => handleDeleteMilestone(selectedMilestone.id, e)}
-                        className="text-rose-400 hover:text-rose-300 text-xs flex items-center gap-1 font-semibold"
+                        className="text-rose-450 hover:text-rose-300 text-xs flex items-center gap-1 font-semibold bg-transparent border-0 cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                         Delete Stage
@@ -324,7 +582,7 @@ export default function Sidebar({
                       </div>
 
                       {/* Owner Badges Assignee Area */}
-                      <div className="border-t border-slate-800/80 pt-3 space-y-2">
+                      <div className="border-t border-slate-800/85 pt-3 space-y-2">
                         <div className="flex justify-between items-center">
                           <span className="text-[10px] font-bold text-slate-400 uppercase">Assigned Badges ({selectedMilestone.assignees.length})</span>
                         </div>

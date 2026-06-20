@@ -8,7 +8,7 @@ import {
   Users,
   Sliders
 } from 'lucide-react';
-import { Milestone, RoadmapConfig, Assignee, TeamMember, CapacityConfig } from '../types';
+import { Milestone, RoadmapConfig, Assignee, TeamMember, CapacityConfig, JiraTicket } from '../types';
 import { INITIAL_MILESTONES, DEFAULT_CONFIG, INITIAL_TEAM_MEMBERS, DEFAULT_CAPACITY_CONFIG } from '../initialData';
 import { 
   getDevelopers, 
@@ -26,6 +26,12 @@ import {
   reorderMilestones,
   resetMilestones
 } from './actions/milestones';
+import {
+  getTickets,
+  addTicket,
+  updateTicket,
+  deleteTicket
+} from './actions/tickets';
 
 // Import our new components
 import Header from '../components/Header';
@@ -33,13 +39,14 @@ import Sidebar, { ASSIGNEE_COLORS, STATUS_COLORS } from '../components/Sidebar';
 import RoadmapCanvas from '../components/RoadmapCanvas';
 import CapacityCanvas from '../components/CapacityCanvas';
 import DeveloperModal from '../components/DeveloperModal';
+import TicketBoardCanvas from '../components/TicketBoardCanvas';
 
 function App() {
   // Main reactive states
-  const [appMode, setAppMode] = useState<'roadmap' | 'capacity'>(() => {
+  const [appMode, setAppMode] = useState<'roadmap' | 'capacity' | 'tickets'>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('applet_visual_mode');
-      return (saved as 'roadmap' | 'capacity') || 'roadmap';
+      return (saved as 'roadmap' | 'capacity' | 'tickets') || 'roadmap';
     }
     return 'roadmap';
   });
@@ -74,6 +81,13 @@ function App() {
 
   const [newAssigneeName, setNewAssigneeName] = useState('');
   
+  // Daily tickets and timelog management states
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    return new Date().toISOString().split('T')[0];
+  });
+  const [tickets, setTickets] = useState<JiraTicket[]>([]);
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
+
   // States for Team Capacity Member editing
   const [newMemberName, setNewMemberName] = useState('');
   const [newMemberRole, setNewMemberRole] = useState('Associate');
@@ -94,7 +108,7 @@ function App() {
     localStorage.setItem('capacity_config_data', JSON.stringify(capacityConfig));
   }, [capacityConfig]);
 
-  // Load team members and milestones from SQLite on mount
+  // Load team members, milestones, and daily tickets from SQLite on mount
   useEffect(() => {
     getDevelopers().then((data) => {
       if (data && data.length > 0) {
@@ -117,6 +131,13 @@ function App() {
         if (INITIAL_MILESTONES.length > 0) {
           setSelectedMilestoneId(INITIAL_MILESTONES[0].id);
         }
+      }
+    });
+
+    getTickets().then((data) => {
+      if (data && data.length > 0) {
+        setTickets(data);
+        setSelectedTicketId(data[0].id);
       }
     });
   }, []);
@@ -236,6 +257,46 @@ function App() {
     const updatedAssignees = currentMilestone.assignees.filter(a => a.id !== assigneeId);
     handleUpdateMilestone(milestoneId, 'assignees', updatedAssignees);
     showNotification('Assignee removed', 'error');
+  };
+
+  // --- HANDLERS FOR JIRA TICKETS ---
+  const handleAddTicket = (ticket: JiraTicket) => {
+    addTicket(ticket).then((success) => {
+      if (success) {
+        setTickets(prev => [...prev, ticket]);
+        setSelectedTicketId(ticket.id);
+        showNotification(`Logged ticket ${ticket.id} successfully!`);
+      } else {
+        showNotification('Failed to add ticket to database', 'error');
+      }
+    });
+  };
+
+  const handleDeleteTicket = (id: string) => {
+    deleteTicket(id).then((success) => {
+      if (success) {
+        const filtered = tickets.filter(t => t.id !== id);
+        setTickets(filtered);
+        if (selectedTicketId === id) {
+          setSelectedTicketId(filtered.length > 0 ? filtered[0].id : null);
+        }
+        showNotification(`Deleted ticket ${id}`, 'error');
+      } else {
+        showNotification('Failed to delete ticket from database', 'error');
+      }
+    });
+  };
+
+  const handleUpdateTicket = <K extends keyof JiraTicket>(id: string, key: K, value: JiraTicket[K]) => {
+    const current = tickets.find(t => t.id === id);
+    if (!current) return;
+    const updatedTicket = { ...current, [key]: value };
+    setTickets(prev => prev.map(t => t.id === id ? updatedTicket : t));
+    updateTicket(updatedTicket).then((success) => {
+      if (!success) {
+        showNotification('Failed to update ticket in database', 'error');
+      }
+    });
   };
 
   // --- HANDLERS FOR TEAM MEMBERS ---
@@ -713,6 +774,17 @@ function App() {
             <Users className="w-3.5 h-3.5" />
             Team Capacity Visualizer
           </button>
+          <button
+            onClick={() => setAppMode('tickets')}
+            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 active:scale-95 ${
+              appMode === 'tickets'
+                ? 'bg-indigo-600 text-white shadow'
+                : 'text-slate-400 hover:bg-slate-900 hover:text-slate-250'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            JIRA Tickets &amp; Timelogs
+          </button>
         </div>
       </div>
 
@@ -742,6 +814,13 @@ function App() {
           setNewAssigneeName={setNewAssigneeName}
           handleAddAssignee={handleAddAssignee}
           handleRemoveAssignee={handleRemoveAssignee}
+          tickets={tickets}
+          selectedTicketId={selectedTicketId}
+          setSelectedTicketId={setSelectedTicketId}
+          handleAddTicket={handleAddTicket}
+          handleDeleteTicket={handleDeleteTicket}
+          handleUpdateTicket={handleUpdateTicket}
+          selectedDate={selectedDate}
         />
 
         {/* Right Side: Interactive Preview Canvas stage */}
@@ -768,13 +847,22 @@ function App() {
                 selectedMilestoneId={selectedMilestoneId}
                 setSelectedMilestoneId={setSelectedMilestoneId}
               />
-            ) : (
+            ) : appMode === 'capacity' ? (
               <CapacityCanvas
                 teamMembers={teamMembers}
                 selectedDeveloperIds={selectedDeveloperIds}
                 capacityConfig={capacityConfig}
                 selectedTeamMemberId={selectedTeamMemberId}
                 setSelectedTeamMemberId={setSelectedTeamMemberId}
+              />
+            ) : (
+              <TicketBoardCanvas
+                tickets={tickets}
+                teamMembers={teamMembers}
+                selectedTicketId={selectedTicketId}
+                setSelectedTicketId={setSelectedTicketId}
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
               />
             )}
 
