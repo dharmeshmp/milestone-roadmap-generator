@@ -1,0 +1,6 @@
+{
+  "name": "Milestone Roadmap Generator",
+  "description": "An interactive utility to design, customize, and export professional milestone roadmaps with custom stages, assignees, and timeline states.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
