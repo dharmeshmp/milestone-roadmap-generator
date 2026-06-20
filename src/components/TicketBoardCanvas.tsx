@@ -9,6 +9,7 @@ interface TicketBoardCanvasProps {
   setSelectedTicketId: (id: string | null) => void;
   selectedDate: string;
   setSelectedDate: (date: string) => void;
+  handleUpdateTicket: <K extends keyof JiraTicket>(id: string, key: K, value: JiraTicket[K]) => void;
 }
 
 export default function TicketBoardCanvas({
@@ -18,8 +19,12 @@ export default function TicketBoardCanvas({
   setSelectedTicketId,
   selectedDate,
   setSelectedDate,
+  handleUpdateTicket,
 }: TicketBoardCanvasProps) {
   
+  // State for dragging column feedback
+  const [draggedOverColumn, setDraggedOverColumn] = React.useState<'To Do' | 'In Progress' | 'Done' | null>(null);
+
   // Filter tickets by selected date
   const filteredTickets = tickets.filter(t => t.date === selectedDate);
 
@@ -35,6 +40,18 @@ export default function TicketBoardCanvas({
     return teamMembers.find(m => m.id === devId);
   };
 
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    e.dataTransfer.setData('text/plain', id);
+  };
+
+  const handleDrop = (e: React.DragEvent, status: 'To Do' | 'In Progress' | 'Done') => {
+    e.preventDefault();
+    const ticketId = e.dataTransfer.getData('text/plain');
+    if (ticketId) {
+      handleUpdateTicket(ticketId, 'status', status);
+    }
+  };
+
   const renderTicketCard = (ticket: JiraTicket) => {
     const isSelected = ticket.id === selectedTicketId;
     const developer = getDeveloper(ticket.assignee_id);
@@ -42,11 +59,13 @@ export default function TicketBoardCanvas({
     return (
       <div 
         key={ticket.id}
+        draggable={true}
+        onDragStart={(e) => handleDragStart(e, ticket.id)}
         onClick={(e) => {
           e.stopPropagation();
           setSelectedTicketId(ticket.id);
         }}
-        className={`bg-white border-2 rounded-xl p-4 cursor-pointer transition-all duration-200 select-none flex flex-col justify-between gap-3 relative overflow-hidden ${
+        className={`bg-white border-2 rounded-xl p-4 cursor-grab active:cursor-grabbing transition-all duration-200 select-none flex flex-col justify-between gap-3 relative overflow-hidden ${
           isSelected 
             ? 'border-indigo-600 shadow-md ring-2 ring-indigo-500/20' 
             : 'border-slate-200 hover:border-indigo-300 hover:shadow-sm'
@@ -129,7 +148,17 @@ export default function TicketBoardCanvas({
       {/* Kanban Grid Columns */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {/* Column 1: To Do */}
-        <div className="bg-slate-50/75 rounded-2xl p-4 border border-slate-200/50 flex flex-col gap-3 min-h-[300px]">
+        <div 
+          onDragOver={(e) => e.preventDefault()}
+          onDragEnter={() => setDraggedOverColumn('To Do')}
+          onDragLeave={() => setDraggedOverColumn(null)}
+          onDrop={(e) => { handleDrop(e, 'To Do'); setDraggedOverColumn(null); }}
+          className={`rounded-2xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[300px] ${
+            draggedOverColumn === 'To Do' 
+              ? 'border-indigo-400 ring-2 ring-indigo-400/20 bg-indigo-50/5' 
+              : 'bg-slate-550 bg-slate-50/75 border-slate-200/50'
+          }`}
+        >
           <div className="flex items-center justify-between pb-1">
             <span className="text-xs font-extrabold text-slate-550 uppercase tracking-widest flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
@@ -149,7 +178,17 @@ export default function TicketBoardCanvas({
         </div>
 
         {/* Column 2: In Progress */}
-        <div className="bg-indigo-50/20 rounded-2xl p-4 border border-indigo-100/50 flex flex-col gap-3 min-h-[300px]">
+        <div 
+          onDragOver={(e) => e.preventDefault()}
+          onDragEnter={() => setDraggedOverColumn('In Progress')}
+          onDragLeave={() => setDraggedOverColumn(null)}
+          onDrop={(e) => { handleDrop(e, 'In Progress'); setDraggedOverColumn(null); }}
+          className={`rounded-2xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[300px] ${
+            draggedOverColumn === 'In Progress' 
+              ? 'border-indigo-400 ring-2 ring-indigo-400/20 bg-indigo-50/15' 
+              : 'bg-indigo-50/20 border-indigo-100/50'
+          }`}
+        >
           <div className="flex items-center justify-between pb-1">
             <span className="text-xs font-extrabold text-indigo-650 uppercase tracking-widest flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
@@ -169,7 +208,17 @@ export default function TicketBoardCanvas({
         </div>
 
         {/* Column 3: Done */}
-        <div className="bg-emerald-50/20 rounded-2xl p-4 border border-emerald-100/30 flex flex-col gap-3 min-h-[300px]">
+        <div 
+          onDragOver={(e) => e.preventDefault()}
+          onDragEnter={() => setDraggedOverColumn('Done')}
+          onDragLeave={() => setDraggedOverColumn(null)}
+          onDrop={(e) => { handleDrop(e, 'Done'); setDraggedOverColumn(null); }}
+          className={`rounded-2xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[300px] ${
+            draggedOverColumn === 'Done' 
+              ? 'border-emerald-400 ring-2 ring-emerald-400/20 bg-emerald-50/15' 
+              : 'bg-emerald-50/20 border-emerald-100/30'
+          }`}
+        >
           <div className="flex items-center justify-between pb-1">
             <span className="text-xs font-extrabold text-emerald-700 uppercase tracking-widest flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />

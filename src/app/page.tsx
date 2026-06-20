@@ -887,6 +887,7 @@ function App() {
                 setSelectedTicketId={setSelectedTicketId}
                 selectedDate={selectedDate}
                 setSelectedDate={setSelectedDate}
+                handleUpdateTicket={handleUpdateTicket}
               />
             )}
 
