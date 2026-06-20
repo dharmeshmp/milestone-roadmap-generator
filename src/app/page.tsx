@@ -1,4 +1,7 @@
+"use client";
+
 import React, { useState, useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { 
   Plus, 
   Trash2, 
@@ -24,8 +27,8 @@ import {
   Heart,
   Users
 } from 'lucide-react';
-import { Milestone, RoadmapConfig, IconType, Assignee, TeamMember, CapacityConfig } from './types';
-import { INITIAL_MILESTONES, DEFAULT_CONFIG, INITIAL_TEAM_MEMBERS, DEFAULT_CAPACITY_CONFIG } from './initialData';
+import { Milestone, RoadmapConfig, IconType, Assignee, TeamMember, CapacityConfig } from '../types';
+import { INITIAL_MILESTONES, DEFAULT_CONFIG, INITIAL_TEAM_MEMBERS, DEFAULT_CAPACITY_CONFIG } from '../initialData';
 
 // Color Presets for assignees
 const ASSIGNEE_COLORS = [
@@ -49,7 +52,7 @@ const STATUS_COLORS = [
   { name: 'Cloud Slate', bg: 'bg-slate-200', text: 'text-slate-800' }
 ];
 
-export default function App() {
+function App() {
   // Main reactive states
   const [appMode, setAppMode] = useState<'roadmap' | 'capacity'>(() => {
     const saved = localStorage.getItem('applet_visual_mode');
@@ -1730,3 +1733,9 @@ export default function App() {
     </div>
   );
 }
+
+const DynamicApp = dynamic(() => Promise.resolve(App), {
+  ssr: false,
+});
+
+export default DynamicApp;
