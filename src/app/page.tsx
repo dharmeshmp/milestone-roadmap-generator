@@ -32,6 +32,7 @@ import Header from '../components/Header';
 import Sidebar, { ASSIGNEE_COLORS, STATUS_COLORS } from '../components/Sidebar';
 import RoadmapCanvas from '../components/RoadmapCanvas';
 import CapacityCanvas from '../components/CapacityCanvas';
+import DeveloperModal from '../components/DeveloperModal';
 
 function App() {
   // Main reactive states
@@ -64,7 +65,8 @@ function App() {
     return DEFAULT_CAPACITY_CONFIG;
   });
 
-  const [activeTab, setActiveTab] = useState<'editor' | 'styles' | 'developers'>('editor');
+  const [activeTab, setActiveTab] = useState<'editor' | 'styles'>('editor');
+  const [isDeveloperModalOpen, setIsDeveloperModalOpen] = useState(false);
   
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>(null);
 
@@ -675,7 +677,11 @@ function App() {
       )}
 
       {/* Header Element Component */}
-      <Header handleResetToDefault={handleResetToDefault} handleExportSVG={handleExportSVG} />
+      <Header 
+        handleResetToDefault={handleResetToDefault} 
+        handleExportSVG={handleExportSVG} 
+        onOpenDeveloperModal={() => setIsDeveloperModalOpen(true)}
+      />
 
       {/* View Mode Mode Segmented Control Bar */}
       <div className="bg-slate-900 border-b border-slate-800/80 px-6 py-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shrink-0">
@@ -728,8 +734,6 @@ function App() {
           setSelectedDeveloperIds={setSelectedDeveloperIds}
           selectedMilestoneId={selectedMilestoneId}
           setSelectedMilestoneId={setSelectedMilestoneId}
-          selectedTeamMemberId={selectedTeamMemberId}
-          setSelectedTeamMemberId={setSelectedTeamMemberId}
           handleAddMilestone={handleAddMilestone}
           handleDeleteMilestone={handleDeleteMilestone}
           handleUpdateMilestone={handleUpdateMilestone}
@@ -738,16 +742,6 @@ function App() {
           setNewAssigneeName={setNewAssigneeName}
           handleAddAssignee={handleAddAssignee}
           handleRemoveAssignee={handleRemoveAssignee}
-          newMemberName={newMemberName}
-          setNewMemberName={setNewMemberName}
-          newMemberRole={newMemberRole}
-          setNewMemberRole={setNewMemberRole}
-          newMemberUtil={newMemberUtil}
-          setNewMemberUtil={setNewMemberUtil}
-          handleAddTeamMember={handleAddTeamMember}
-          handleUpdateTeamMember={handleUpdateTeamMember}
-          handleDeleteTeamMember={handleDeleteTeamMember}
-          handleMoveTeamMember={handleMoveTeamMember}
         />
 
         {/* Right Side: Interactive Preview Canvas stage */}
@@ -793,6 +787,26 @@ function App() {
         </section>
 
       </main>
+
+      {/* Global Developer Directory modal */}
+      <DeveloperModal
+        isOpen={isDeveloperModalOpen}
+        onClose={() => setIsDeveloperModalOpen(false)}
+        teamMembers={teamMembers}
+        capacityConfig={capacityConfig}
+        selectedTeamMemberId={selectedTeamMemberId}
+        setSelectedTeamMemberId={setSelectedTeamMemberId}
+        newMemberName={newMemberName}
+        setNewMemberName={setNewMemberName}
+        newMemberRole={newMemberRole}
+        setNewMemberRole={setNewMemberRole}
+        newMemberUtil={newMemberUtil}
+        setNewMemberUtil={setNewMemberUtil}
+        handleAddTeamMember={handleAddTeamMember}
+        handleUpdateTeamMember={handleUpdateTeamMember}
+        handleDeleteTeamMember={handleDeleteTeamMember}
+        handleMoveTeamMember={handleMoveTeamMember}
+      />
 
     </div>
   );

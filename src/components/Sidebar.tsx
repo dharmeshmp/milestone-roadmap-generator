@@ -44,8 +44,8 @@ export const STATUS_COLORS = [
 
 interface SidebarProps {
   appMode: 'roadmap' | 'capacity';
-  activeTab: 'editor' | 'styles' | 'developers';
-  setActiveTab: (tab: 'editor' | 'styles' | 'developers') => void;
+  activeTab: 'editor' | 'styles';
+  setActiveTab: (tab: 'editor' | 'styles') => void;
   
   milestones: Milestone[];
   config: RoadmapConfig;
@@ -60,9 +60,6 @@ interface SidebarProps {
   
   selectedMilestoneId: string | null;
   setSelectedMilestoneId: React.Dispatch<React.SetStateAction<string | null>>;
-  
-  selectedTeamMemberId: string | null;
-  setSelectedTeamMemberId: React.Dispatch<React.SetStateAction<string | null>>;
 
   handleAddMilestone: () => void;
   handleDeleteMilestone: (id: string, e?: React.MouseEvent) => void;
@@ -73,17 +70,6 @@ interface SidebarProps {
   setNewAssigneeName: (val: string) => void;
   handleAddAssignee: (milestoneId: string) => void;
   handleRemoveAssignee: (milestoneId: string, assigneeId: string) => void;
-
-  newMemberName: string;
-  setNewMemberName: (val: string) => void;
-  newMemberRole: string;
-  setNewMemberRole: (val: string) => void;
-  newMemberUtil: number;
-  setNewMemberUtil: (val: number) => void;
-  handleAddTeamMember: () => void;
-  handleUpdateTeamMember: <K extends keyof TeamMember>(id: string, key: K, value: TeamMember[K]) => void;
-  handleDeleteTeamMember: (id: string, e?: React.MouseEvent) => void;
-  handleMoveTeamMember: (index: number, direction: 'up' | 'down') => void;
 }
 
 export default function Sidebar({
@@ -100,8 +86,6 @@ export default function Sidebar({
   setSelectedDeveloperIds,
   selectedMilestoneId,
   setSelectedMilestoneId,
-  selectedTeamMemberId,
-  setSelectedTeamMemberId,
   handleAddMilestone,
   handleDeleteMilestone,
   handleUpdateMilestone,
@@ -109,21 +93,10 @@ export default function Sidebar({
   newAssigneeName,
   setNewAssigneeName,
   handleAddAssignee,
-  handleRemoveAssignee,
-  newMemberName,
-  setNewMemberName,
-  newMemberRole,
-  setNewMemberRole,
-  newMemberUtil,
-  setNewMemberUtil,
-  handleAddTeamMember,
-  handleUpdateTeamMember,
-  handleDeleteTeamMember,
-  handleMoveTeamMember
+  handleRemoveAssignee
 }: SidebarProps) {
 
   const selectedMilestone = milestones.find(m => m.id === selectedMilestoneId);
-  const selectedTeamMember = teamMembers.find(m => m.id === selectedTeamMemberId);
 
   return (
     <section className="w-full lg:w-[460px] xl:w-[500px] border-b lg:border-b-0 lg:border-r border-slate-800 bg-slate-950 flex flex-col overflow-hidden shrink-0">
@@ -151,17 +124,6 @@ export default function Sidebar({
         >
           <Layers className="w-3.5 h-3.5 text-indigo-400" />
           Canvas Settings
-        </button>
-        <button 
-          onClick={() => setActiveTab('developers')}
-          className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition flex items-center justify-center gap-2 ${
-            activeTab === 'developers' 
-              ? 'bg-slate-800 text-white shadow' 
-              : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
-          }`}
-        >
-          <Users className="w-3.5 h-3.5 text-indigo-400" />
-          Developers
         </button>
       </div>
 
@@ -588,217 +550,6 @@ export default function Sidebar({
                     {config.hideStatus ? 'Status pills hidden from view/export' : 'Status pills visible on cards'}
                   </span>
                 </label>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'developers' && (
-          <div className="space-y-6">
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">Developers</h2>
-                <span className="text-xs text-slate-500 font-mono">{teamMembers.length} engineers</span>
-              </div>
-
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-1 bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/80">
-                {teamMembers.length === 0 ? (
-                  <div className="text-center py-6 text-slate-500 text-xs">
-                    No team members yet. Click "+ Add New Teammate" below.
-                  </div>
-                ) : (
-                  teamMembers.map((member, idx) => {
-                    const isFocused = member.id === selectedTeamMemberId;
-                    let statusColor = 'bg-teal-500 ring-teal-500/20';
-                    if (member.utilization >= capacityConfig.orangeThreshold) {
-                      statusColor = 'bg-rose-500 ring-rose-500/20';
-                    } else if (member.utilization >= capacityConfig.greenThreshold) {
-                      statusColor = 'bg-amber-500 ring-amber-500/20';
-                    }
-                    return (
-                      <div 
-                        key={member.id}
-                        onClick={() => setSelectedTeamMemberId(member.id)}
-                        className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer border transition ${
-                          isFocused 
-                            ? 'bg-indigo-950/25 border-indigo-500/40 text-white' 
-                            : 'bg-slate-900 hover:bg-slate-800/80 border-transparent text-slate-300'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${statusColor} ring-2`} />
-                          <div className="truncate">
-                            <p className="font-semibold text-xs truncate max-w-[140px] text-slate-200">{member.name}</p>
-                            <p className="text-[9px] text-slate-400 uppercase tracking-wider font-bold truncate max-w-[145px]">{member.role}</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition">
-                          <span className="text-[11px] font-mono font-bold mr-2 text-slate-400">{member.utilization}%</span>
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); handleMoveTeamMember(idx, 'up'); }}
-                            disabled={idx === 0}
-                            className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-slate-800 text-slate-400 bg-transparent border-0 cursor-pointer"
-                            title="Move Rank Up"
-                          >
-                            <ArrowUp className="w-3.5 h-3.5" />
-                          </button>
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); handleMoveTeamMember(idx, 'down'); }}
-                            disabled={idx === teamMembers.length - 1}
-                            className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-slate-800 text-slate-400 bg-transparent border-0 cursor-pointer"
-                            title="Move Rank Down"
-                          >
-                            <ArrowDown className="w-3.5 h-3.5" />
-                          </button>
-                          <button 
-                            onClick={(e) => handleDeleteTeamMember(member.id, e)}
-                            className="p-1 hover:text-rose-400 rounded hover:bg-slate-800 text-slate-500 bg-transparent border-0 cursor-pointer"
-                            title="Delete Member"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-
-            {/* Focused Teammate Detail Form Editor */}
-            {selectedTeamMember ? (
-              <div className="border border-slate-800 bg-slate-900/60 p-4 rounded-xl space-y-4 shadow-sm font-sans">
-                <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
-                  <div className="flex items-center gap-2">
-                    <span className="p-1 rounded bg-slate-800 text-rose-400 font-mono text-[9px] uppercase tracking-wider font-bold">EDITING TEAM</span>
-                    <h3 className="font-bold text-xs text-white truncate max-w-[180px]">
-                      {selectedTeamMember.name}
-                    </h3>
-                  </div>
-                  <button 
-                    onClick={(e) => handleDeleteTeamMember(selectedTeamMember.id, e)}
-                    className="text-rose-400 hover:text-rose-300 text-xs flex items-center gap-1 font-semibold bg-transparent border-0 cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    Delete Profile
-                  </button>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Name</label>
-                      <input 
-                        type="text"
-                        value={selectedTeamMember.name}
-                        onChange={(e) => handleUpdateTeamMember(selectedTeamMember.id, 'name', e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
-                        placeholder="e.g. Ronak"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Role</label>
-                      <select 
-                        value={selectedTeamMember.role}
-                        onChange={(e) => handleUpdateTeamMember(selectedTeamMember.id, 'role', e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
-                      >
-                        <option value="Specialist">Specialist</option>
-                        <option value="Associate">Associate</option>
-                        <option value="Lead">Lead</option>
-                        <option value="Manager">Manager</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase mb-1">
-                      <span>Utilization</span>
-                      <span className="text-white font-mono">{selectedTeamMember.utilization}%</span>
-                    </div>
-                    <input 
-                      type="range" 
-                      min="0" 
-                      max="150" 
-                      step="5"
-                      value={selectedTeamMember.utilization} 
-                      onChange={(e) => handleUpdateTeamMember(selectedTeamMember.id, 'utilization', parseInt(e.target.value, 10))}
-                      className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Badge Color</label>
-                    <div className="flex gap-2 items-center">
-                      <input 
-                        type="color" 
-                        value={selectedTeamMember.color || '#2580eb'} 
-                        onChange={(e) => handleUpdateTeamMember(selectedTeamMember.id, 'color', e.target.value)}
-                        className="w-8 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
-                      />
-                      <input 
-                        type="text" 
-                        value={selectedTeamMember.color || '#2580eb'} 
-                        onChange={(e) => handleUpdateTeamMember(selectedTeamMember.id, 'color', e.target.value)}
-                        className="flex-grow bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
-                      />
-                    </div>
-                    {/* Quick color circles preview */}
-                    <div className="flex gap-1.5 items-center pt-2 overflow-x-auto">
-                      {ASSIGNEE_COLORS.map((col) => (
-                        <button
-                          key={col.value}
-                          type="button"
-                          onClick={() => handleUpdateTeamMember(selectedTeamMember.id, 'color', col.value)}
-                          className={`w-3.5 h-3.5 rounded-full border transition flex justify-center items-center ${
-                            selectedTeamMember.color === col.value ? 'border-white scale-125 ring-2 ring-indigo-500/30' : 'border-transparent'
-                          }`}
-                          style={{ backgroundColor: col.value }}
-                          title={col.name}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-6 text-slate-500 text-xs bg-slate-900/20 border border-dashed border-slate-800 rounded-xl">
-                Select a developer from the list above to edit their details.
-              </div>
-            )}
-
-            {/* Quick Add Teammate Card */}
-            <div className="p-4 bg-slate-900/40 border border-slate-800/80 rounded-xl space-y-3">
-              <h3 className="text-xs font-bold text-slate-300">Quick Add Member</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <input 
-                  type="text" 
-                  placeholder="Name" 
-                  value={newMemberName} 
-                  onChange={(e) => setNewMemberName(e.target.value)}
-                  className="bg-slate-950 border border-slate-800 rounded-lg py-1 px-2.5 text-xs text-white focus:outline-none"
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleAddTeamMember(); }}
-                />
-                <select 
-                  value={newMemberRole} 
-                  onChange={(e) => setNewMemberRole(e.target.value)}
-                  className="bg-slate-950 border border-slate-800 rounded-lg py-1 px-1.5 text-xs text-white focus:outline-none"
-                >
-                  <option value="Associate">Associate</option>
-                  <option value="Specialist">Specialist</option>
-                  <option value="Lead">Lead</option>
-                  <option value="Manager">Manager</option>
-                </select>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] text-slate-400">Default Util: {newMemberUtil}%</span>
-                <button 
-                  onClick={handleAddTeamMember}
-                  className="px-3 py-1 bg-[#be185d] hover:bg-[#9d174d] rounded-lg text-xs font-bold text-white transition active:scale-95"
-                >
-                  Add Teammate
-                </button>
               </div>
             </div>
           </div>

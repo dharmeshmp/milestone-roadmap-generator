@@ -1,12 +1,12 @@
-import React from 'react';
-import { Sliders, RotateCcw, Download } from 'lucide-react';
+import { Sliders, RotateCcw, Download, Users } from 'lucide-react';
 
 interface HeaderProps {
   handleResetToDefault: () => void;
   handleExportSVG: () => void;
+  onOpenDeveloperModal: () => void;
 }
 
-export default function Header({ handleResetToDefault, handleExportSVG }: HeaderProps) {
+export default function Header({ handleResetToDefault, handleExportSVG, onOpenDeveloperModal }: HeaderProps) {
   return (
     <header className="border-b border-slate-800 bg-slate-950 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shrink-0 shadow-lg relative z-20">
       <div className="flex items-center gap-3">
@@ -23,6 +23,14 @@ export default function Header({ handleResetToDefault, handleExportSVG }: Header
       </div>
 
       <div className="flex flex-wrap items-center gap-2.5">
+        <button 
+          onClick={onOpenDeveloperModal}
+          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 hover:text-white transition flex items-center gap-1.5 active:scale-95"
+        >
+          <Users className="w-3.5 h-3.5 text-indigo-400" />
+          Manage Developers
+        </button>
+
         <button 
           onClick={handleResetToDefault}
           className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 hover:text-white transition flex items-center gap-1.5 active:scale-95"
