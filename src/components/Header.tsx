@@ -1,12 +1,37 @@
-import { Sliders, RotateCcw, Download, Users } from 'lucide-react';
+import { Sliders, RotateCcw, Download, Users, FileJson, Upload } from 'lucide-react';
 
 interface HeaderProps {
   handleResetToDefault: () => void;
   handleExportSVG: () => void;
   onOpenDeveloperModal: () => void;
+  handleExportJSON: () => void;
+  handleImportJSON: (data: any) => void;
 }
 
-export default function Header({ handleResetToDefault, handleExportSVG, onOpenDeveloperModal }: HeaderProps) {
+export default function Header({ 
+  handleResetToDefault, 
+  handleExportSVG, 
+  onOpenDeveloperModal,
+  handleExportJSON,
+  handleImportJSON
+}: HeaderProps) {
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const json = JSON.parse(evt.target?.result as string);
+        handleImportJSON(json);
+      } catch (err) {
+        alert('Invalid JSON file format!');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   return (
     <header className="border-b border-slate-800 bg-slate-950 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shrink-0 shadow-lg relative z-20">
       <div className="flex items-center gap-3">
@@ -30,6 +55,26 @@ export default function Header({ handleResetToDefault, handleExportSVG, onOpenDe
           <Users className="w-3.5 h-3.5 text-indigo-400" />
           Manage Developers
         </button>
+
+        <button 
+          onClick={handleExportJSON}
+          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 hover:text-white transition flex items-center gap-1.5 active:scale-95"
+          title="Export full data as JSON"
+        >
+          <FileJson className="w-3.5 h-3.5 text-indigo-400" />
+          Export JSON
+        </button>
+
+        <label className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 hover:text-white transition flex items-center gap-1.5 active:scale-95 cursor-pointer">
+          <Upload className="w-3.5 h-3.5 text-indigo-400" />
+          Import JSON
+          <input 
+            type="file" 
+            accept=".json" 
+            onChange={handleFileChange} 
+            className="hidden" 
+          />
+        </label>
 
         <button 
           onClick={handleResetToDefault}

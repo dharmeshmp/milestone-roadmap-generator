@@ -34,6 +34,7 @@ import {
   updateTicket,
   deleteTicket
 } from './actions/tickets';
+import { importFullData } from './actions/importExport';
 
 // Import our new components
 import Header from '../components/Header';
@@ -412,6 +413,54 @@ function App() {
     }
   };
 
+  // --- HANDLERS FOR IMPORT/EXPORT JSON DATA ---
+  const handleExportJSON = () => {
+    const data = {
+      developers: teamMembers,
+      milestones: milestones,
+      tickets: tickets
+    };
+    const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
+      JSON.stringify(data, null, 2)
+    )}`;
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', jsonString);
+    downloadAnchor.setAttribute('download', 'studio_backup_data.json');
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    showNotification('Exported full database state as JSON successfully!');
+  };
+
+  const handleImportJSON = (data: any) => {
+    importFullData(data).then((success) => {
+      if (success) {
+        getDevelopers().then((devs) => {
+          if (devs && devs.length > 0) {
+            setTeamMembers(devs);
+            setSelectedDeveloperIds(devs.map(m => m.id));
+            setSelectedTeamMemberId(prev => prev === null || !devs.some(m => m.id === prev) ? devs[0].id : prev);
+          }
+        });
+        getMilestones().then((ms) => {
+          if (ms && ms.length > 0) {
+            setMilestones(ms);
+            setSelectedMilestoneId(ms[0].id);
+          }
+        });
+        getTickets().then((tks) => {
+          if (tks && tks.length > 0) {
+            setTickets(tks);
+            setSelectedTicketId(tks[0].id);
+          }
+        });
+        showNotification('Imported and restored database state successfully!');
+      } else {
+        showNotification('Failed to import database JSON', 'error');
+      }
+    });
+  };
+
   // --- EXPORT HIGH-FIDELITY VECTOR SVG ---
   const handleExportSVG = () => {
     if (appMode === 'roadmap') {
@@ -745,6 +794,8 @@ function App() {
         handleResetToDefault={handleResetToDefault} 
         handleExportSVG={handleExportSVG} 
         onOpenDeveloperModal={() => setIsDeveloperModalOpen(true)}
+        handleExportJSON={handleExportJSON}
+        handleImportJSON={handleImportJSON}
       />
 
       {/* View Mode Mode Segmented Control Bar */}
