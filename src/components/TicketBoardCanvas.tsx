@@ -65,7 +65,7 @@ export default function TicketBoardCanvas({
           e.stopPropagation();
           setSelectedTicketId(ticket.id);
         }}
-        className={`bg-white border-2 rounded-xl p-4 cursor-grab active:cursor-grabbing transition-all duration-200 select-none flex flex-col justify-between gap-3 relative overflow-hidden ${
+        className={`bg-white border-2 rounded-xl p-4 cursor-grab active:cursor-grabbing transition-all duration-200 select-none flex flex-col justify-between gap-3 relative overflow-hidden shrink-0 ${
           isSelected 
             ? 'border-indigo-600 shadow-md ring-2 ring-indigo-500/20' 
             : 'border-slate-200 hover:border-indigo-300 hover:shadow-sm'
