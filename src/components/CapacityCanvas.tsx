@@ -8,6 +8,7 @@ interface CapacityCanvasProps {
   capacityConfig: CapacityConfig;
   selectedTeamMemberId: string | null;
   setSelectedTeamMemberId: (id: string | null) => void;
+  capacityDates: string[];
 }
 
 export default function CapacityCanvas({
@@ -16,6 +17,7 @@ export default function CapacityCanvas({
   capacityConfig,
   selectedTeamMemberId,
   setSelectedTeamMemberId,
+  capacityDates,
 }: CapacityCanvasProps) {
   
   const activeMembers = teamMembers.filter(m => selectedDeveloperIds.includes(m.id));
@@ -35,7 +37,8 @@ export default function CapacityCanvas({
   const handleExportGroupSVG = (groupIndex: number, groupMembers: TeamMember[]) => {
     const rowHeight = 70;
     const padding = 35;
-    const headerHeight = 75;
+    const hasDates = capacityDates && capacityDates.length > 0;
+    const headerHeight = 75 + (hasDates ? 15 : 0);
     const colHeaderHeight = 22;
     const legendHeight = 55;
     const totalWidth = 520;
@@ -72,7 +75,8 @@ export default function CapacityCanvas({
     svgContent += `
       <g transform="translate(${padding}, 40)">
         <text y="0" class="title">${displayTitle.toUpperCase()}</text>
-        <line x1="0" y1="12" x2="${totalWidth - padding * 2}" y2="12" stroke="#e2e8f0" stroke-width="2" />
+        ${hasDates ? `<text y="15" font-size="9px" fill="#64748b" font-family="monospace">DATES: ${capacityDates.join(', ')}</text>` : ''}
+        <line x1="0" y1="${hasDates ? 25 : 12}" x2="${totalWidth - padding * 2}" y2="${hasDates ? 25 : 12}" stroke="#e2e8f0" stroke-width="2" />
       </g>
     `;
 
@@ -193,6 +197,11 @@ export default function CapacityCanvas({
                   <span>Download SVG</span>
                 </button>
               </div>
+              {capacityDates && capacityDates.length > 0 && (
+                <div className="text-[11px] text-slate-500 font-mono mt-1">
+                  Dates: {capacityDates.join(', ')} ({capacityDates.length * 8}h capacity)
+                </div>
+              )}
               {/* Thick accent bar matching exact design */}
               <div className="h-1 bg-[#dee4ff] w-full mt-2.5 rounded-full relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-24 h-full bg-[#1a235a] rounded-full" />

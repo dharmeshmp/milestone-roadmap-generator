@@ -99,7 +99,33 @@ function App() {
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
+  const [capacityDates, setCapacityDates] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('capacity_dates_list');
+      return saved ? JSON.parse(saved) : [new Date().toISOString().split('T')[0]];
+    }
+    return [new Date().toISOString().split('T')[0]];
+  });
+
+  const computedTeamMembers = React.useMemo(() => {
+    return teamMembers.map(member => {
+      if (capacityDates.length === 0) {
+        return member;
+      }
+      const totalHours = tickets
+        .filter(t => t.assignee_id === member.id && capacityDates.includes(t.date))
+        .reduce((sum, t) => sum + (t.timelog || 0), 0);
+      const totalCapacity = capacityDates.length * 8;
+      const utilization = Math.round((totalHours / totalCapacity) * 100);
+      return { ...member, utilization };
+    });
+  }, [teamMembers, tickets, capacityDates]);
+
   // Sync state to local storage when changed
+  useEffect(() => {
+    localStorage.setItem('capacity_dates_list', JSON.stringify(capacityDates));
+  }, [capacityDates]);
+
   useEffect(() => {
     localStorage.setItem('applet_visual_mode', appMode);
   }, [appMode]);
@@ -661,11 +687,12 @@ function App() {
       // Team Capacity visualizer export
       const rowHeight = 70;
       const padding = 35;
-      const headerHeight = 75;
+      const hasDates = capacityDates && capacityDates.length > 0;
+      const headerHeight = 75 + (hasDates ? 15 : 0);
       const colHeaderHeight = 22;
       const legendHeight = 55;
       const totalWidth = 520;
-      const activeMembers = teamMembers.filter(m => selectedDeveloperIds.includes(m.id));
+      const activeMembers = computedTeamMembers.filter(m => selectedDeveloperIds.includes(m.id));
       const totalHeight = headerHeight + colHeaderHeight + (activeMembers.length * rowHeight) + legendHeight + padding;
 
       let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${totalWidth} ${totalHeight}" width="${totalWidth}" height="${totalHeight}" style="background-color: white; font-family: 'Inter', system-ui, sans-serif;">`;
@@ -695,7 +722,8 @@ function App() {
       svgContent += `
         <g transform="translate(${padding}, 40)">
           <text y="0" class="title">${capacityConfig.title.toUpperCase()}</text>
-          <line x1="0" y1="12" x2="${totalWidth - padding * 2}" y2="12" stroke="#e2e8f0" stroke-width="2" />
+          ${hasDates ? `<text y="15" font-size="9px" fill="#64748b" font-family="monospace">DATES: ${capacityDates.join(', ')}</text>` : ''}
+          <line x1="0" y1="${hasDates ? 25 : 12}" x2="${totalWidth - padding * 2}" y2="${hasDates ? 25 : 12}" stroke="#e2e8f0" stroke-width="2" />
         </g>
       `;
 
@@ -886,7 +914,7 @@ function App() {
             milestones={milestones}
             config={config}
             setConfig={setConfig}
-            teamMembers={teamMembers}
+            teamMembers={computedTeamMembers}
             capacityConfig={capacityConfig}
             setCapacityConfig={setCapacityConfig}
             selectedDeveloperIds={selectedDeveloperIds}
@@ -909,6 +937,8 @@ function App() {
             handleUpdateTicket={handleUpdateTicket}
             selectedDate={selectedDate}
             handleReorderDevelopers={handleReorderDevelopers}
+            capacityDates={capacityDates}
+            setCapacityDates={setCapacityDates}
           />
         </div>
 
@@ -938,11 +968,12 @@ function App() {
               />
             ) : appMode === 'capacity' ? (
               <CapacityCanvas
-                teamMembers={teamMembers}
+                teamMembers={computedTeamMembers}
                 selectedDeveloperIds={selectedDeveloperIds}
                 capacityConfig={capacityConfig}
                 selectedTeamMemberId={selectedTeamMemberId}
                 setSelectedTeamMemberId={setSelectedTeamMemberId}
+                capacityDates={capacityDates}
               />
             ) : (
               <TicketBoardCanvas

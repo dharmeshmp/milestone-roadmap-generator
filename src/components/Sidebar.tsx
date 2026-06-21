@@ -80,6 +80,8 @@ interface SidebarProps {
   handleUpdateTicket: <K extends keyof JiraTicket>(id: string, key: K, value: JiraTicket[K]) => void;
   selectedDate: string;
   handleReorderDevelopers: (orderedIds: string[]) => void;
+  capacityDates: string[];
+  setCapacityDates: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export default function Sidebar({
@@ -111,7 +113,9 @@ export default function Sidebar({
   handleDeleteTicket,
   handleUpdateTicket,
   selectedDate,
-  handleReorderDevelopers
+  handleReorderDevelopers,
+  capacityDates,
+  setCapacityDates,
 }: SidebarProps) {
 
   const selectedMilestone = milestones.find(m => m.id === selectedMilestoneId);
@@ -684,6 +688,113 @@ export default function Sidebar({
               </>
             ) : (
               <>
+                {/* Capacity Dates Selection */}
+                <div className="space-y-3 border-b border-slate-800/80 pb-4 mb-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">Capacity Dates</h2>
+                    <span className="text-xs text-slate-500 font-mono">{capacityDates.length} selected</span>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input 
+                      type="date"
+                      id="capacity-date-picker"
+                      className="flex-grow bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none font-mono"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          const val = (e.target as HTMLInputElement).value;
+                          if (val && !capacityDates.includes(val)) {
+                            setCapacityDates([...capacityDates, val].sort());
+                          }
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const picker = document.getElementById('capacity-date-picker') as HTMLInputElement;
+                        const val = picker?.value;
+                        if (val && !capacityDates.includes(val)) {
+                          setCapacityDates([...capacityDates, val].sort());
+                        }
+                      }}
+                      className="px-3 py-1.5 bg-indigo-650 hover:bg-indigo-550 active:scale-95 transition rounded-lg text-xs font-bold text-white whitespace-nowrap"
+                    >
+                      Add Date
+                    </button>
+                  </div>
+
+                  {/* Selected Dates List */}
+                  <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-1.5 bg-slate-950/40 rounded-lg border border-slate-800/80">
+                    {capacityDates.length === 0 ? (
+                      <span className="text-[10px] text-slate-500 italic p-0.5">No dates selected. Showing global capacity.</span>
+                    ) : (
+                      capacityDates.map((d) => (
+                        <div 
+                          key={d}
+                          className="px-2 py-0.5 rounded bg-slate-800 text-slate-200 text-xs font-mono flex items-center gap-1 border border-slate-700/50"
+                        >
+                          <span>{d}</span>
+                          <button
+                            type="button"
+                            onClick={() => setCapacityDates(capacityDates.filter(x => x !== d))}
+                            className="text-slate-400 hover:text-slate-250 font-bold ml-1 text-[11px] focus:outline-none"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Quick-add toggle based on existing ticket dates */}
+                  {Array.from(new Set(tickets.map(t => t.date))).length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Quick Select (Dates with Active Logged Tickets)</p>
+                      <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto">
+                        {Array.from(new Set(tickets.map(t => t.date)))
+                          .sort()
+                          .map(d => {
+                            const isSelected = capacityDates.includes(d);
+                            return (
+                              <button
+                                key={d}
+                                type="button"
+                                onClick={() => {
+                                  if (isSelected) {
+                                    setCapacityDates(capacityDates.filter(x => x !== d));
+                                  } else {
+                                    setCapacityDates([...capacityDates, d].sort());
+                                  }
+                                }}
+                                className={`px-2 py-0.5 rounded text-[9px] font-mono border transition ${
+                                  isSelected 
+                                    ? 'bg-indigo-950/40 border-indigo-500/40 text-indigo-300' 
+                                    : 'bg-slate-900 border-transparent text-slate-400 hover:bg-slate-850 hover:text-slate-350'
+                                }`}
+                              >
+                                {d}
+                              </button>
+                            );
+                          })
+                        }
+                      </div>
+                    </div>
+                  )}
+
+                  {capacityDates.length > 0 && (
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setCapacityDates([])}
+                        className="text-[9px] text-slate-500 hover:text-rose-400 font-bold uppercase tracking-wider focus:outline-none"
+                      >
+                        Clear All Dates
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 {/* Select Developers */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between mb-3">
