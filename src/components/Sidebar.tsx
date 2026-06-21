@@ -1004,6 +1004,23 @@ export default function Sidebar({
                     </label>
                   </div>
                 </div>
+
+                {/* Milestones per Card (Group Size) Selection */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase font-sans">Milestones Per Card (Group Size)</label>
+                  <select
+                    value={config.groupSize || 0}
+                    onChange={(e) => setConfig({ ...config, groupSize: parseInt(e.target.value) || 0 })}
+                    className="w-full bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                  >
+                    <option value={0}>Show all in a single card</option>
+                    <option value={1}>1 milestone per card</option>
+                    <option value={2}>2 milestones per card</option>
+                    <option value={3}>3 milestones per card</option>
+                    <option value={4}>4 milestones per card</option>
+                    <option value={5}>5 milestones per card</option>
+                  </select>
+                </div>
               </>
             ) : appMode === 'capacity' ? (
               <>

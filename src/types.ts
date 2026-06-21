@@ -26,6 +26,7 @@ export interface RoadmapConfig {
   cardBg: string; // hex or Tailwind bg-class
   cardBorder: string; // hex or Tailwind border-class
   hideStatus?: boolean; // toggle visibility of the rightmost status pill
+  groupSize?: number; // number of milestones per card
 }
 
 export interface TeamMember {

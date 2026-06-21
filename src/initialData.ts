@@ -65,7 +65,8 @@ export const DEFAULT_CONFIG: RoadmapConfig = {
   canvasBg: 'grid',
   cardBg: '#eef2ff', // soft light indigo-blue background
   cardBorder: '#1a235a', // dark navy blue border from original image
-  hideStatus: false
+  hideStatus: false,
+  groupSize: 0
 };
 
 export const INITIAL_TEAM_MEMBERS: TeamMember[] = [
