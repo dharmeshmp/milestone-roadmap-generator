@@ -85,8 +85,12 @@ export default function CapacityCanvas({
                 }`}
               >
                 <div className="grid grid-cols-[1.5fr_1.5fr_1.2fr] sm:grid-cols-[1.8fr_1.5fr_1.5fr] gap-4 items-center mb-3">
-                  <div className="font-bold text-sm text-slate-800 truncate">
-                    {member.name}
+                  <div className="font-bold text-sm text-slate-800 truncate flex items-center gap-2">
+                    <span 
+                      className="w-2.5 h-2.5 rounded-full inline-block shrink-0"
+                      style={{ backgroundColor: member.color || '#2580eb' }}
+                    />
+                    <span>{member.name}</span>
                   </div>
                   <div>
                     <span className="px-2.5 py-1 rounded-md bg-indigo-50 text-[#4f46e5] text-[10px] font-extrabold uppercase tracking-wider">

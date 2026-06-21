@@ -735,8 +735,14 @@ export default function Sidebar({
                               className="w-4 h-4 text-indigo-600 bg-slate-950 border-slate-800 rounded focus:ring-indigo-500 focus:ring-2 focus:ring-offset-slate-900 cursor-pointer"
                             />
                             <label htmlFor={`checkbox-dev-${member.id}`} className="flex-grow cursor-pointer select-none">
-                              <p className="font-semibold text-xs text-slate-200">{member.name}</p>
-                              <p className="text-[9px] text-slate-400 uppercase tracking-wider font-bold">{member.role}</p>
+                              <div className="flex items-center gap-1.5">
+                                <span 
+                                  className="w-2 h-2 rounded-full inline-block shrink-0" 
+                                  style={{ backgroundColor: member.color || '#2580eb' }} 
+                                />
+                                <p className="font-semibold text-xs text-slate-200">{member.name}</p>
+                              </div>
+                              <p className="text-[9px] text-slate-400 uppercase tracking-wider font-bold ml-3.5">{member.role}</p>
                             </label>
                             <span className="text-xs font-mono font-bold text-slate-400 select-none">{member.utilization}%</span>
                           </div>
