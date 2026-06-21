@@ -42,6 +42,7 @@ export interface CapacityConfig {
   cardBorder: string;
   greenThreshold: number; // typically 75
   orangeThreshold: number; // typically 90
+  groupSize?: number; // number of developers per card
 }
 
 export interface JiraTicket {

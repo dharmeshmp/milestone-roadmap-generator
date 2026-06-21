@@ -759,116 +759,193 @@ export default function Sidebar({
 
         {activeTab === 'styles' && (
           <div className="space-y-4">
-            <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">Style &amp; Appearance</h2>
+            <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase font-display">Style &amp; Appearance</h2>
             
-            {/* Title */}
-            <div className="space-y-1">
-              <label className="block text-[10px] font-bold text-slate-400 uppercase">Roadmap Main Header Title</label>
-              <input 
-                type="text"
-                value={config.title}
-                onChange={(e) => setConfig({ ...config, title: e.target.value })}
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
-                placeholder="MILESTONE ROADMAP"
-              />
-            </div>
-
-            {/* Timeline axis line color */}
-            <div className="space-y-1">
-              <label className="block text-[10px] font-bold text-slate-400 uppercase">Timeline Axis Color</label>
-              <div className="flex gap-2">
-                <input 
-                  type="color"
-                  value={config.timelineColor}
-                  onChange={(e) => setConfig({ ...config, timelineColor: e.target.value })}
-                  className="w-10 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
-                />
-                <input 
-                  type="text"
-                  value={config.timelineColor}
-                  onChange={(e) => setConfig({ ...config, timelineColor: e.target.value })}
-                  className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
-                />
-              </div>
-            </div>
-
-            {/* Canvas background selector */}
-            <div className="space-y-1">
-              <label className="block text-[10px] font-bold text-slate-400 uppercase">Preview Canvas Grid Layout</label>
-              <div className="grid grid-cols-2 gap-2">
-                {['light', 'grid', 'dark', 'slate'].map((bg) => (
-                  <button
-                    key={bg}
-                    type="button"
-                    onClick={() => setConfig({ ...config, canvasBg: bg as any })}
-                    className={`py-1.5 rounded-lg border text-xs capitalize transition ${
-                      config.canvasBg === bg 
-                        ? 'bg-slate-800 border-indigo-500/50 text-indigo-400' 
-                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    {bg}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Card Background Color picker */}
-            <div className="space-y-1">
-              <label className="block text-[10px] font-bold text-slate-400 uppercase">Card Frame Fill Color</label>
-              <div className="flex gap-2">
-                <input 
-                  type="color"
-                  value={config.cardBg}
-                  onChange={(e) => setConfig({ ...config, cardBg: e.target.value })}
-                  className="w-10 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
-                />
-                <input 
-                  type="text"
-                  value={config.cardBg}
-                  onChange={(e) => setConfig({ ...config, cardBg: e.target.value })}
-                  className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-3 text-xs text-white font-mono"
-                />
-              </div>
-            </div>
-
-            {/* Card Border Customization */}
-            <div className="space-y-1">
-              <label className="block text-[10px] font-bold text-slate-400 uppercase">Card Outer Outline Border Color</label>
-              <div className="flex gap-2">
-                <input 
-                  type="color"
-                  value={config.cardBorder}
-                  onChange={(e) => setConfig({ ...config, cardBorder: e.target.value })}
-                  className="w-10 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
-                />
-                <input 
-                  type="text"
-                  value={config.cardBorder}
-                  onChange={(e) => setConfig({ ...config, cardBorder: e.target.value })}
-                  className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-3 text-xs text-white font-mono"
-                />
-              </div>
-            </div>
-
-            {/* Hide Status Pills Option */}
-            <div className="space-y-1.5 pt-1">
-              <label className="block text-[10px] font-bold text-slate-400 uppercase">Status Badge Visibility</label>
-              <div className="flex items-center">
-                <label className="relative inline-flex items-center cursor-pointer">
+            {appMode === 'roadmap' ? (
+              <>
+                {/* Title */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Roadmap Main Header Title</label>
                   <input 
-                    type="checkbox" 
-                    checked={config.hideStatus || false}
-                    onChange={(e) => setConfig({ ...config, hideStatus: e.target.checked })}
-                    className="sr-only peer"
+                    type="text"
+                    value={config.title}
+                    onChange={(e) => setConfig({ ...config, title: e.target.value })}
+                    className="w-full bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                    placeholder="MILESTONE ROADMAP"
                   />
-                  <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 peer-checked:after:bg-white"></div>
-                  <span className="ml-2 text-xs text-slate-300 font-medium">
-                    {config.hideStatus ? 'Status pills hidden from view/export' : 'Status pills visible on cards'}
-                  </span>
-                </label>
+                </div>
+
+                {/* Timeline axis line color */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Timeline Axis Color</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="color"
+                      value={config.timelineColor}
+                      onChange={(e) => setConfig({ ...config, timelineColor: e.target.value })}
+                      className="w-10 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
+                    />
+                    <input 
+                      type="text"
+                      value={config.timelineColor}
+                      onChange={(e) => setConfig({ ...config, timelineColor: e.target.value })}
+                      className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Canvas background selector */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Preview Canvas Grid Layout</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['light', 'grid', 'dark', 'slate'].map((bg) => (
+                      <button
+                        key={bg}
+                        type="button"
+                        onClick={() => setConfig({ ...config, canvasBg: bg as any })}
+                        className={`py-1.5 rounded-lg border text-xs capitalize transition ${
+                          config.canvasBg === bg 
+                            ? 'bg-slate-800 border-indigo-500/50 text-indigo-400' 
+                            : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        {bg}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Card Background Color picker */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Card Frame Fill Color</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="color"
+                      value={config.cardBg}
+                      onChange={(e) => setConfig({ ...config, cardBg: e.target.value })}
+                      className="w-10 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
+                    />
+                    <input 
+                      type="text"
+                      value={config.cardBg}
+                      onChange={(e) => setConfig({ ...config, cardBg: e.target.value })}
+                      className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-3 text-xs text-white font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Card Border Customization */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Card Outer Outline Border Color</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="color"
+                      value={config.cardBorder}
+                      onChange={(e) => setConfig({ ...config, cardBorder: e.target.value })}
+                      className="w-10 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
+                    />
+                    <input 
+                      type="text"
+                      value={config.cardBorder}
+                      onChange={(e) => setConfig({ ...config, cardBorder: e.target.value })}
+                      className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-3 text-xs text-white font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Hide Status Pills Option */}
+                <div className="space-y-1.5 pt-1">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Status Badge Visibility</label>
+                  <div className="flex items-center">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={config.hideStatus || false}
+                        onChange={(e) => setConfig({ ...config, hideStatus: e.target.checked })}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 peer-checked:after:bg-white"></div>
+                      <span className="ml-2 text-xs text-slate-300 font-medium">
+                        {config.hideStatus ? 'Status pills hidden from view/export' : 'Status pills visible on cards'}
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </>
+            ) : appMode === 'capacity' ? (
+              <>
+                {/* Title */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Capacity Main Header Title</label>
+                  <input 
+                    type="text"
+                    value={capacityConfig.title}
+                    onChange={(e) => setCapacityConfig({ ...capacityConfig, title: e.target.value })}
+                    className="w-full bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                    placeholder="TEAM CAPACITY"
+                  />
+                </div>
+
+                {/* Card Background Color */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Card Background Color</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="color"
+                      value={capacityConfig.cardBg}
+                      onChange={(e) => setCapacityConfig({ ...capacityConfig, cardBg: e.target.value })}
+                      className="w-10 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
+                    />
+                    <input 
+                      type="text"
+                      value={capacityConfig.cardBg}
+                      onChange={(e) => setCapacityConfig({ ...capacityConfig, cardBg: e.target.value })}
+                      className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-3 text-xs text-white font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Card Border Color */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Card Border Color</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="color"
+                      value={capacityConfig.cardBorder}
+                      onChange={(e) => setCapacityConfig({ ...capacityConfig, cardBorder: e.target.value })}
+                      className="w-10 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
+                    />
+                    <input 
+                      type="text"
+                      value={capacityConfig.cardBorder}
+                      onChange={(e) => setCapacityConfig({ ...capacityConfig, cardBorder: e.target.value })}
+                      className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-3 text-xs text-white font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Developers per Card (Group Size) Selection */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase font-sans">Developers Per Card (Group Size)</label>
+                  <select
+                    value={capacityConfig.groupSize || 0}
+                    onChange={(e) => setCapacityConfig({ ...capacityConfig, groupSize: parseInt(e.target.value) || 0 })}
+                    className="w-full bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                  >
+                    <option value={0}>Show all in a single card</option>
+                    <option value={1}>1 developer per card</option>
+                    <option value={2}>2 developers per card</option>
+                    <option value={3}>3 developers per card</option>
+                    <option value={4}>4 developers per card</option>
+                    <option value={5}>5 developers per card</option>
+                  </select>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-6 text-slate-500 text-xs italic">
+                No custom styles available for ticket board canvas.
               </div>
-            </div>
+            )}
           </div>
         )}
       </div>

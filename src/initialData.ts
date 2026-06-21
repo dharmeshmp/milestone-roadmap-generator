@@ -80,6 +80,7 @@ export const DEFAULT_CAPACITY_CONFIG: CapacityConfig = {
   cardBg: '#ffffff',
   cardBorder: '#dee5f7',
   greenThreshold: 75,
-  orangeThreshold: 90
+  orangeThreshold: 90,
+  groupSize: 0
 };
 
