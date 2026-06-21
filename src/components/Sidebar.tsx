@@ -19,7 +19,7 @@ import {
   Users,
   GripVertical
 } from 'lucide-react';
-import { Milestone, RoadmapConfig, TeamMember, CapacityConfig, IconType, JiraTicket } from '../types';
+import { Milestone, RoadmapConfig, TeamMember, CapacityConfig, IconType, JiraTicket, GlobalConfig } from '../types';
 
 // Color Presets for assignees
 export const ASSIGNEE_COLORS = [
@@ -924,27 +924,6 @@ export default function Sidebar({
                       onChange={(e) => setConfig({ ...config, timelineColor: e.target.value })}
                       className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
                     />
-                  </div>
-                </div>
-
-                {/* Canvas background selector */}
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Preview Canvas Grid Layout</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {['light', 'grid', 'dark', 'slate'].map((bg) => (
-                      <button
-                        key={bg}
-                        type="button"
-                        onClick={() => setConfig({ ...config, canvasBg: bg as any })}
-                        className={`py-1.5 rounded-lg border text-xs capitalize transition ${
-                          config.canvasBg === bg 
-                            ? 'bg-slate-800 border-indigo-500/50 text-indigo-400' 
-                            : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
-                        }`}
-                      >
-                        {bg}
-                      </button>
-                    ))}
                   </div>
                 </div>
 

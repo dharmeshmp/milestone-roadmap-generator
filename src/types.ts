@@ -19,10 +19,14 @@ export interface Milestone {
   hideStatus?: boolean; // per-card toggle to hide the status badge
 }
 
+export interface GlobalConfig {
+  canvasBg: 'light' | 'grid' | 'dark' | 'slate';
+  workingHoursPerDay: number;
+}
+
 export interface RoadmapConfig {
   title: string;
   timelineColor: string; // e.g., '#e0f2fe' (sky-100)
-  canvasBg: 'light' | 'grid' | 'dark' | 'slate';
   cardBg: string; // hex or Tailwind bg-class
   cardBorder: string; // hex or Tailwind border-class
   hideStatus?: boolean; // toggle visibility of the rightmost status pill

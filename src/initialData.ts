@@ -1,4 +1,4 @@
-import { Milestone, RoadmapConfig, TeamMember, CapacityConfig } from './types';
+import { Milestone, RoadmapConfig, TeamMember, CapacityConfig, GlobalConfig } from './types';
 
 export const INITIAL_MILESTONES: Milestone[] = [
   {
@@ -62,11 +62,15 @@ export const INITIAL_MILESTONES: Milestone[] = [
 export const DEFAULT_CONFIG: RoadmapConfig = {
   title: 'MILESTONE ROADMAP',
   timelineColor: '#ccd9ff', // light blue from original image
-  canvasBg: 'grid',
   cardBg: '#eef2ff', // soft light indigo-blue background
   cardBorder: '#1a235a', // dark navy blue border from original image
   hideStatus: false,
   groupSize: 0
+};
+
+export const DEFAULT_GLOBAL_CONFIG: GlobalConfig = {
+  canvasBg: 'grid',
+  workingHoursPerDay: 8
 };
 
 export const INITIAL_TEAM_MEMBERS: TeamMember[] = [

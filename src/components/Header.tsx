@@ -1,9 +1,10 @@
-import { Sliders, RotateCcw, Download, Users, FileJson, Upload } from 'lucide-react';
+import { Sliders, RotateCcw, Download, Users, FileJson, Upload, Settings } from 'lucide-react';
 
 interface HeaderProps {
   handleResetToDefault: () => void;
   handleExportSVG: () => void;
   onOpenDeveloperModal: () => void;
+  onOpenSettingsModal: () => void;
   handleExportJSON: () => void;
   handleImportJSON: (data: any) => void;
 }
@@ -12,6 +13,7 @@ export default function Header({
   handleResetToDefault, 
   handleExportSVG, 
   onOpenDeveloperModal,
+  onOpenSettingsModal,
   handleExportJSON,
   handleImportJSON
 }: HeaderProps) {
@@ -54,6 +56,14 @@ export default function Header({
         >
           <Users className="w-3.5 h-3.5 text-indigo-400" />
           Manage Developers
+        </button>
+
+        <button 
+          onClick={onOpenSettingsModal}
+          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 hover:text-white transition flex items-center gap-1.5 active:scale-95"
+        >
+          <Settings className="w-3.5 h-3.5 text-indigo-400" />
+          Global Settings
         </button>
 
         <button 

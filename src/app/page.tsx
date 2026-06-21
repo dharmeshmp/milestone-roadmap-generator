@@ -10,8 +10,8 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { Milestone, RoadmapConfig, Assignee, TeamMember, CapacityConfig, JiraTicket } from '../types';
-import { INITIAL_MILESTONES, DEFAULT_CONFIG, INITIAL_TEAM_MEMBERS, DEFAULT_CAPACITY_CONFIG } from '../initialData';
+import { Milestone, RoadmapConfig, Assignee, TeamMember, CapacityConfig, JiraTicket, GlobalConfig } from '../types';
+import { INITIAL_MILESTONES, DEFAULT_CONFIG, INITIAL_TEAM_MEMBERS, DEFAULT_CAPACITY_CONFIG, DEFAULT_GLOBAL_CONFIG } from '../initialData';
 import { 
   getDevelopers, 
   addDeveloper, 
@@ -42,6 +42,7 @@ import Sidebar, { ASSIGNEE_COLORS, STATUS_COLORS } from '../components/Sidebar';
 import RoadmapCanvas from '../components/RoadmapCanvas';
 import CapacityCanvas from '../components/CapacityCanvas';
 import DeveloperModal from '../components/DeveloperModal';
+import SettingsModal from '../components/SettingsModal';
 import TicketBoardCanvas from '../components/TicketBoardCanvas';
 
 function App() {
@@ -77,6 +78,7 @@ function App() {
 
   const [activeTab, setActiveTab] = useState<'editor' | 'styles'>('editor');
   const [isDeveloperModalOpen, setIsDeveloperModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>(null);
 
@@ -98,6 +100,14 @@ function App() {
 
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const [globalConfig, setGlobalConfig] = useState<GlobalConfig>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('global_config_data');
+      return saved ? JSON.parse(saved) : DEFAULT_GLOBAL_CONFIG;
+    }
+    return DEFAULT_GLOBAL_CONFIG;
+  });
 
   const [capacityDates, setCapacityDates] = useState<string[]>(() => {
     if (typeof window !== 'undefined') {
@@ -123,13 +133,17 @@ function App() {
       const totalHours = tickets
         .filter(t => t.assignee_id === member.id && capacityDates.includes(t.date))
         .reduce((sum, t) => sum + (t.timelog || 0), 0);
-      const totalCapacity = capacityDates.length * 8;
+      const totalCapacity = capacityDates.length * (globalConfig.workingHoursPerDay || 8);
       const utilization = Math.round((totalHours / totalCapacity) * 100);
       return { ...member, utilization };
     });
-  }, [teamMembers, tickets, capacityDates, showGlobalCapacityDevIds]);
+  }, [teamMembers, tickets, capacityDates, showGlobalCapacityDevIds, globalConfig.workingHoursPerDay]);
 
   // Sync state to local storage when changed
+  useEffect(() => {
+    localStorage.setItem('global_config_data', JSON.stringify(globalConfig));
+  }, [globalConfig]);
+
   useEffect(() => {
     localStorage.setItem('capacity_dates_list', JSON.stringify(capacityDates));
   }, [capacityDates]);
@@ -816,7 +830,7 @@ function App() {
   };
 
   const getCanvasBgClass = () => {
-    switch (config.canvasBg) {
+    switch (globalConfig.canvasBg) {
       case 'light': return 'bg-white';
       case 'grid': return 'bg-[#f8fafc] bg-grid-pattern';
       case 'dark': return 'bg-slate-900 bg-dark-grid-pattern';
@@ -847,6 +861,7 @@ function App() {
         handleResetToDefault={handleResetToDefault} 
         handleExportSVG={handleExportSVG} 
         onOpenDeveloperModal={() => setIsDeveloperModalOpen(true)}
+        onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
         handleExportJSON={handleExportJSON}
         handleImportJSON={handleImportJSON}
       />
@@ -1029,6 +1044,14 @@ function App() {
         handleUpdateTeamMember={handleUpdateTeamMember}
         handleDeleteTeamMember={handleDeleteTeamMember}
         handleMoveTeamMember={handleMoveTeamMember}
+      />
+
+      {/* Global Settings modal */}
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        globalConfig={globalConfig}
+        setGlobalConfig={setGlobalConfig}
       />
 
     </div>
