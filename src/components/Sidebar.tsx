@@ -82,6 +82,8 @@ interface SidebarProps {
   handleReorderDevelopers: (orderedIds: string[]) => void;
   capacityDates: string[];
   setCapacityDates: React.Dispatch<React.SetStateAction<string[]>>;
+  showGlobalCapacityDevIds: string[];
+  setShowGlobalCapacityDevIds: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export default function Sidebar({
@@ -116,6 +118,8 @@ export default function Sidebar({
   handleReorderDevelopers,
   capacityDates,
   setCapacityDates,
+  showGlobalCapacityDevIds,
+  setShowGlobalCapacityDevIds,
 }: SidebarProps) {
 
   const selectedMilestone = milestones.find(m => m.id === selectedMilestoneId);
@@ -855,6 +859,24 @@ export default function Sidebar({
                               </div>
                               <p className="text-[9px] text-slate-400 uppercase tracking-wider font-bold ml-3.5">{member.role}</p>
                             </label>
+                            {capacityDates.length > 0 && (
+                              <div className="flex items-center gap-1 shrink-0" title={showGlobalCapacityDevIds.includes(member.id) ? "Showing Global Capacity (Check to show dynamic dates capacity)" : "Showing Dynamic Dates Capacity (Uncheck to show global capacity)"}>
+                                <input 
+                                  type="checkbox"
+                                  checked={!showGlobalCapacityDevIds.includes(member.id)}
+                                  id={`checkbox-dyn-${member.id}`}
+                                  onChange={() => {
+                                    if (showGlobalCapacityDevIds.includes(member.id)) {
+                                      setShowGlobalCapacityDevIds(showGlobalCapacityDevIds.filter(id => id !== member.id));
+                                    } else {
+                                      setShowGlobalCapacityDevIds([...showGlobalCapacityDevIds, member.id]);
+                                    }
+                                  }}
+                                  className="w-3 h-3 text-indigo-600 bg-slate-950 border-slate-800 rounded focus:ring-indigo-500 cursor-pointer"
+                                />
+                                <label htmlFor={`checkbox-dyn-${member.id}`} className="text-[9px] text-slate-450 font-bold uppercase select-none cursor-pointer">Dyn</label>
+                              </div>
+                            )}
                             <span className="text-xs font-mono font-bold text-slate-400 select-none">{member.utilization}%</span>
                           </div>
                         );

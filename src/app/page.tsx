@@ -107,9 +107,17 @@ function App() {
     return [new Date().toISOString().split('T')[0]];
   });
 
+  const [showGlobalCapacityDevIds, setShowGlobalCapacityDevIds] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('show_global_capacity_dev_ids');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+
   const computedTeamMembers = React.useMemo(() => {
     return teamMembers.map(member => {
-      if (capacityDates.length === 0) {
+      if (capacityDates.length === 0 || showGlobalCapacityDevIds.includes(member.id)) {
         return member;
       }
       const totalHours = tickets
@@ -119,12 +127,16 @@ function App() {
       const utilization = Math.round((totalHours / totalCapacity) * 100);
       return { ...member, utilization };
     });
-  }, [teamMembers, tickets, capacityDates]);
+  }, [teamMembers, tickets, capacityDates, showGlobalCapacityDevIds]);
 
   // Sync state to local storage when changed
   useEffect(() => {
     localStorage.setItem('capacity_dates_list', JSON.stringify(capacityDates));
   }, [capacityDates]);
+
+  useEffect(() => {
+    localStorage.setItem('show_global_capacity_dev_ids', JSON.stringify(showGlobalCapacityDevIds));
+  }, [showGlobalCapacityDevIds]);
 
   useEffect(() => {
     localStorage.setItem('applet_visual_mode', appMode);
@@ -939,6 +951,8 @@ function App() {
             handleReorderDevelopers={handleReorderDevelopers}
             capacityDates={capacityDates}
             setCapacityDates={setCapacityDates}
+            showGlobalCapacityDevIds={showGlobalCapacityDevIds}
+            setShowGlobalCapacityDevIds={setShowGlobalCapacityDevIds}
           />
         </div>
 
