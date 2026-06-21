@@ -384,6 +384,19 @@ function App() {
     });
   };
 
+  const handleReorderDevelopers = (orderedIds: string[]) => {
+    const orderedMembers = orderedIds.map(id => teamMembers.find(m => m.id === id)).filter(Boolean) as TeamMember[];
+    setTeamMembers(orderedMembers);
+    
+    reorderDevelopers(orderedIds).then((success) => {
+      if (success) {
+        showNotification('Developer order updated');
+      } else {
+        showNotification('Failed to save developer order to database', 'error');
+      }
+    });
+  };
+
   const handleResetToDefault = () => {
     if (appMode === 'roadmap') {
       resetMilestones(INITIAL_MILESTONES).then((success) => {
@@ -895,6 +908,7 @@ function App() {
             handleDeleteTicket={handleDeleteTicket}
             handleUpdateTicket={handleUpdateTicket}
             selectedDate={selectedDate}
+            handleReorderDevelopers={handleReorderDevelopers}
           />
         </div>
 

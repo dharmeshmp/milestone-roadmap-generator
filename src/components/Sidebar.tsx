@@ -16,7 +16,8 @@ import {
   CheckSquare,
   Sliders,
   Layers,
-  Users
+  Users,
+  GripVertical
 } from 'lucide-react';
 import { Milestone, RoadmapConfig, TeamMember, CapacityConfig, IconType, JiraTicket } from '../types';
 
@@ -78,6 +79,7 @@ interface SidebarProps {
   handleDeleteTicket: (id: string) => void;
   handleUpdateTicket: <K extends keyof JiraTicket>(id: string, key: K, value: JiraTicket[K]) => void;
   selectedDate: string;
+  handleReorderDevelopers: (orderedIds: string[]) => void;
 }
 
 export default function Sidebar({
@@ -108,7 +110,8 @@ export default function Sidebar({
   handleAddTicket,
   handleDeleteTicket,
   handleUpdateTicket,
-  selectedDate
+  selectedDate,
+  handleReorderDevelopers
 }: SidebarProps) {
 
   const selectedMilestone = milestones.find(m => m.id === selectedMilestoneId);
@@ -124,6 +127,24 @@ export default function Sidebar({
   const [newTicketDateLocal, setNewTicketDateLocal] = React.useState(() => {
     return new Date().toISOString().split('T')[0];
   });
+
+  // Local state for dragging developers
+  const [draggedOverDevId, setDraggedOverDevId] = React.useState<string | null>(null);
+
+  const handleDeveloperDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    const draggedId = e.dataTransfer.getData('text/plain');
+    if (!draggedId) return;
+
+    const sourceIndex = teamMembers.findIndex(m => m.id === draggedId);
+    if (sourceIndex === -1 || sourceIndex === targetIndex) return;
+
+    const result = [...teamMembers];
+    const [removed] = result.splice(sourceIndex, 1);
+    result.splice(targetIndex, 0, removed);
+
+    handleReorderDevelopers(result.map(m => m.id));
+  };
 
   return (
     <section className="w-full lg:w-[460px] xl:w-[500px] border-b lg:border-b-0 lg:border-r border-slate-800 bg-slate-950 flex flex-col overflow-hidden shrink-0">
@@ -676,16 +697,34 @@ export default function Sidebar({
                         No developers found. Go to the "Developers" tab to add them.
                       </div>
                     ) : (
-                      teamMembers.map((member) => {
+                      teamMembers.map((member, idx) => {
                         const isChecked = selectedDeveloperIds.includes(member.id);
+                        const isDraggedOver = draggedOverDevId === member.id;
                         return (
-                          <label 
+                          <div 
                             key={member.id}
-                            className="flex items-center gap-3 p-2.5 rounded-lg cursor-pointer bg-slate-900 hover:bg-slate-850 border border-slate-800 transition"
+                            draggable={true}
+                            onDragStart={(e) => {
+                              e.dataTransfer.setData('text/plain', member.id);
+                            }}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDragEnter={() => setDraggedOverDevId(member.id)}
+                            onDragLeave={() => setDraggedOverDevId(null)}
+                            onDrop={(e) => {
+                              handleDeveloperDrop(e, idx);
+                              setDraggedOverDevId(null);
+                            }}
+                            className={`flex items-center gap-3 p-2.5 rounded-lg border transition cursor-grab active:cursor-grabbing ${
+                              isDraggedOver 
+                                ? 'border-indigo-500 bg-slate-850 ring-2 ring-indigo-500/20' 
+                                : 'bg-slate-900 border-slate-800 hover:bg-slate-850'
+                            }`}
                           >
+                            <GripVertical className="w-3.5 h-3.5 text-slate-500 hover:text-slate-300 shrink-0" />
                             <input 
                               type="checkbox"
                               checked={isChecked}
+                              id={`checkbox-dev-${member.id}`}
                               onChange={() => {
                                 if (isChecked) {
                                   setSelectedDeveloperIds(selectedDeveloperIds.filter(id => id !== member.id));
@@ -695,12 +734,12 @@ export default function Sidebar({
                               }}
                               className="w-4 h-4 text-indigo-600 bg-slate-950 border-slate-800 rounded focus:ring-indigo-500 focus:ring-2 focus:ring-offset-slate-900 cursor-pointer"
                             />
-                            <div className="flex-grow">
+                            <label htmlFor={`checkbox-dev-${member.id}`} className="flex-grow cursor-pointer select-none">
                               <p className="font-semibold text-xs text-slate-200">{member.name}</p>
                               <p className="text-[9px] text-slate-400 uppercase tracking-wider font-bold">{member.role}</p>
-                            </div>
-                            <span className="text-xs font-mono font-bold text-slate-400">{member.utilization}%</span>
-                          </label>
+                            </label>
+                            <span className="text-xs font-mono font-bold text-slate-400 select-none">{member.utilization}%</span>
+                          </div>
                         );
                       })
                     )}
