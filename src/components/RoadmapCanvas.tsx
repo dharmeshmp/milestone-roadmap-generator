@@ -23,7 +23,7 @@ export default function RoadmapCanvas({
     switch (type) {
       case 'lock':
         return (
-          <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 shadow-sm flex items-center justify-center text-amber-600 relative group-hover:scale-105 transition-transform">
+          <div className="w-10 h-10 rounded-lg bg-amber-50 border border-amber-200 shadow-sm flex items-center justify-center text-amber-600 relative group-hover:scale-105 transition-transform">
             <div className="absolute top-1.5 w-4 h-4 rounded-t-full border-2 border-amber-600 border-b-0" />
             <div className="w-5 h-4 bg-amber-600 rounded-lg absolute bottom-2 flex items-center justify-center">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-50" />
@@ -32,7 +32,7 @@ export default function RoadmapCanvas({
         );
       case 'traffic-light':
         return (
-          <div className="w-10 h-11 bg-slate-950 border border-slate-800 rounded-xl flex flex-col justify-between p-1 items-center gap-[1px] shadow-md group-hover:scale-105 transition-transform" title="Traffic Light Selector">
+          <div className="w-10 h-11 bg-zinc-950 border border-zinc-800 rounded-lg flex flex-col justify-between p-1 items-center gap-[1px] shadow-md group-hover:scale-105 transition-transform" title="Traffic Light Selector">
             <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]" />
             <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_#fbbf24]" />
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
@@ -40,32 +40,32 @@ export default function RoadmapCanvas({
         );
       case 'warning':
         return (
-          <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 shadow-sm flex items-center justify-center text-amber-500 relative group-hover:scale-105 transition-transform">
+          <div className="w-10 h-10 rounded-lg bg-amber-50 border border-amber-100 shadow-sm flex items-center justify-center text-amber-500 relative group-hover:scale-105 transition-transform">
             <AlertTriangle className="w-6 h-6 fill-amber-300 stroke-amber-600 stroke-[2.5]" />
           </div>
         );
       case 'clipboard':
         return (
-          <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200 shadow-sm flex items-center justify-center text-orange-600 relative group-hover:scale-105 transition-transform">
+          <div className="w-10 h-10 rounded-lg bg-orange-50 border border-orange-200 shadow-sm flex items-center justify-center text-orange-600 relative group-hover:scale-105 transition-transform">
             <ClipboardList className="w-5 h-5 stroke-orange-700 stroke-[2]" />
             <span className="absolute top-1 bg-orange-700 w-3 h-1.5 rounded-sm" />
           </div>
         );
       case 'check':
         return (
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 shadow-sm flex items-center justify-center text-emerald-600 relative group-hover:scale-105 transition-transform">
+          <div className="w-10 h-10 rounded-lg bg-emerald-50 border border-emerald-200 shadow-sm flex items-center justify-center text-emerald-600 relative group-hover:scale-105 transition-transform">
             <CheckSquare className="w-5 h-5 stroke-emerald-600 stroke-[2.5]" />
           </div>
         );
       case 'calendar':
         return (
-          <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 shadow-sm flex items-center justify-center text-sky-600 relative group-hover:scale-105 transition-transform">
+          <div className="w-10 h-10 rounded-lg bg-sky-50 border border-sky-200 shadow-sm flex items-center justify-center text-sky-600 relative group-hover:scale-105 transition-transform">
             <Calendar className="w-5 h-5 stroke-sky-600 stroke-[2.5]" />
           </div>
         );
       case 'sparkles':
         return (
-          <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 shadow-sm flex items-center justify-center text-indigo-600 relative group-hover:scale-105 transition-transform">
+          <div className="w-10 h-10 rounded-lg bg-indigo-50 border border-indigo-200 shadow-sm flex items-center justify-center text-indigo-600 relative group-hover:scale-105 transition-transform">
             <Sparkles className="w-5 h-5 stroke-indigo-600 stroke-[2.5] fill-indigo-200" />
           </div>
         );
@@ -296,7 +296,7 @@ export default function RoadmapCanvas({
                   <button
                     type="button"
                     onClick={() => handleExportGroupSVG(groupIndex, groupMilestones)}
-                    className="flex items-center gap-1 px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-[#4f46e5] rounded-xl text-[10px] font-extrabold uppercase tracking-wider transition active:scale-95 cursor-pointer border border-indigo-100/60"
+                    className="flex items-center gap-1 px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-[#4f46e5] rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition active:scale-98 cursor-pointer border border-indigo-100/60"
                     title="Download this roadmap card as SVG"
                   >
                     <Download className="w-3.5 h-3.5" />
@@ -312,7 +312,7 @@ export default function RoadmapCanvas({
 
             {/* Timeline Container Flow */}
             {groupMilestones.length === 0 ? (
-              <div className="py-20 text-center text-slate-400 italic font-medium">
+              <div className="py-20 text-center text-zinc-400 italic font-medium">
                 Create milestones in the editor on the left to begin your timeline.
               </div>
             ) : (
@@ -359,7 +359,7 @@ export default function RoadmapCanvas({
 
                       {/* Milestone Card Block */}
                       <div 
-                        className={`rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between border-2 transition-all gap-4 relative overflow-hidden shadow-sm ${
+                        className={`rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between border-2 transition-all gap-4 relative overflow-hidden shadow-sm ${
                           isSelected 
                             ? 'ring-2 ring-offset-2 ring-indigo-500 shadow-lg' 
                             : ''
@@ -383,7 +383,7 @@ export default function RoadmapCanvas({
                             <h3 className="font-bold text-base sm:text-lg text-[#1a235a] tracking-tight hover:text-[#2d3a82] transition leading-tight">
                               {milestone.title || 'Untitled Node'}
                             </h3>
-                            <p className="text-xs sm:text-sm text-slate-500 font-semibold flex items-center gap-1">
+                            <p className="text-xs sm:text-sm text-zinc-500 font-semibold flex items-center gap-1">
                               {milestone.subtitle}
                             </p>
 

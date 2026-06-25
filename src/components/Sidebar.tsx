@@ -155,30 +155,30 @@ export default function Sidebar({
   };
 
   return (
-    <section className="w-full lg:w-[460px] xl:w-[500px] border-b lg:border-b-0 lg:border-r border-slate-800 bg-slate-950 flex flex-col overflow-hidden shrink-0">
+    <section className="w-full lg:w-[460px] xl:w-[500px] border-b lg:border-b-0 lg:border-r border-zinc-800 bg-zinc-950 flex flex-col overflow-hidden shrink-0">
       
       {/* Editor Tabs Navigation */}
-      <div className="flex border-b border-slate-800 bg-slate-950/80 p-1.5 gap-1 shrink-0">
+      <div className="flex border-b border-zinc-850 bg-zinc-950/80 p-1 gap-1 shrink-0">
         <button 
           onClick={() => setActiveTab('editor')}
-          className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition flex items-center justify-center gap-2 ${
+          className={`flex-1 py-1.5 px-3 text-xs font-medium rounded-md transition flex items-center justify-center gap-2 cursor-pointer ${
             activeTab === 'editor' 
-              ? 'bg-slate-800 text-white shadow' 
-              : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
+              ? 'bg-zinc-900 text-zinc-100 border border-zinc-800 shadow-sm font-semibold' 
+              : 'text-zinc-400 hover:text-zinc-200 border border-transparent'
           }`}
         >
-          <Sliders className="w-3.5 h-3.5 text-indigo-400" />
+          <Sliders className="w-3.5 h-3.5 text-zinc-400" />
           Visual Editor
         </button>
         <button 
           onClick={() => setActiveTab('styles')}
-          className={`flex-1 py-2 px-3 text-xs font-bold rounded-lg transition flex items-center justify-center gap-2 ${
+          className={`flex-1 py-1.5 px-3 text-xs font-medium rounded-md transition flex items-center justify-center gap-2 cursor-pointer ${
             activeTab === 'styles' 
-              ? 'bg-slate-800 text-white shadow' 
-              : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
+              ? 'bg-zinc-900 text-zinc-100 border border-zinc-800 shadow-sm font-semibold' 
+              : 'text-zinc-400 hover:text-zinc-200 border border-transparent'
           }`}
         >
-          <Layers className="w-3.5 h-3.5 text-indigo-400" />
+          <Layers className="w-3.5 h-3.5 text-zinc-400" />
           Canvas Settings
         </button>
       </div>
@@ -193,15 +193,15 @@ export default function Sidebar({
                 {/* Tickets list for selected date */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">Daily Activities</h2>
-                    <span className="text-xs text-slate-500 font-mono">
+                    <h2 className="text-xs font-bold tracking-widest text-zinc-400 uppercase">Daily Activities</h2>
+                    <span className="text-xs text-zinc-500 font-mono">
                       {tickets.filter(t => t.date === selectedDate).length} tasks
                     </span>
                   </div>
 
-                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1 bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/80">
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1 bg-zinc-900/40 p-2.5 rounded-lg border border-zinc-800/80">
                     {tickets.filter(t => t.date === selectedDate).length === 0 ? (
-                      <div className="text-center py-6 text-slate-500 text-xs">
+                      <div className="text-center py-6 text-zinc-500 text-xs">
                         No JIRA tickets for today. Add a ticket below.
                       </div>
                     ) : (
@@ -214,11 +214,11 @@ export default function Sidebar({
                             className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer border transition ${
                               isFocused 
                                 ? 'bg-indigo-950/25 border-indigo-500/40 text-white' 
-                                : 'bg-slate-900 hover:bg-slate-800/80 border-transparent text-slate-350'
+                                : 'bg-zinc-900 hover:bg-zinc-800/80 border-transparent text-zinc-350'
                             }`}
                           >
                             <div className="flex items-center gap-2 min-w-0">
-                              <span className="text-[10px] font-bold font-mono text-slate-400 shrink-0">
+                              <span className="text-[10px] font-bold font-mono text-zinc-400 shrink-0">
                                 {ticket.id}
                               </span>
                               <span className="font-semibold text-xs truncate max-w-[150px]">
@@ -228,7 +228,7 @@ export default function Sidebar({
                             <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition">
                               <button 
                                 onClick={(e) => { e.stopPropagation(); handleDeleteTicket(ticket.id); }}
-                                className="p-1 hover:text-rose-450 rounded hover:bg-slate-800 text-slate-500 bg-transparent border-0 cursor-pointer"
+                                className="p-1 hover:text-rose-450 rounded hover:bg-zinc-800 text-zinc-500 bg-transparent border-0 cursor-pointer"
                                 title="Delete Ticket"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -243,10 +243,10 @@ export default function Sidebar({
 
                 {/* Edit Form */}
                 {selectedTicket ? (
-                  <div className="border border-slate-850 bg-slate-900/50 p-4 rounded-xl space-y-4 shadow-sm font-sans">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                  <div className="border border-zinc-800/80 bg-zinc-900/50 p-4 rounded-lg space-y-4 shadow-sm font-sans">
+                    <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
                       <div className="flex items-center gap-2">
-                        <span className="p-1 rounded bg-slate-800 text-indigo-400 font-mono text-[9px] uppercase tracking-wider font-bold">TICKET</span>
+                        <span className="p-1 rounded bg-zinc-800 text-indigo-400 font-mono text-[9px] uppercase tracking-wider font-bold">TICKET</span>
                         <h3 className="font-bold text-xs text-white truncate max-w-[150px]">{selectedTicket.id}</h3>
                       </div>
                       <button 
@@ -260,22 +260,22 @@ export default function Sidebar({
 
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Activity Title</label>
+                        <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Activity Title</label>
                         <input 
                           type="text"
                           value={selectedTicket.title}
                           onChange={(e) => handleUpdateTicket(selectedTicket.id, 'title', e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                          className="w-full bg-zinc-950 border border-zinc-800/80 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
                         />
                       </div>
 
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Assignee</label>
+                          <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Assignee</label>
                           <select 
                             value={selectedTicket.assignee_id || ''}
                             onChange={(e) => handleUpdateTicket(selectedTicket.id, 'assignee_id', e.target.value || null)}
-                            className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none"
+                            className="w-full bg-zinc-950 border border-zinc-800/80 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none"
                           >
                             <option value="">Unassigned</option>
                             {teamMembers.map((m) => (
@@ -284,11 +284,11 @@ export default function Sidebar({
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Status</label>
+                          <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Status</label>
                           <select 
                             value={selectedTicket.status}
                             onChange={(e) => handleUpdateTicket(selectedTicket.id, 'status', e.target.value as any)}
-                            className="w-full bg-slate-950 border border-slate-855 rounded-lg py-1.5 px-2 text-xs text-white focus:outline-none"
+                            className="w-full bg-zinc-950 border border-slate-855 rounded-lg py-1.5 px-2 text-xs text-white focus:outline-none"
                           >
                             <option value="To Do">To Do</option>
                             <option value="In Progress">In Progress</option>
@@ -300,7 +300,7 @@ export default function Sidebar({
 
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Log Hours</label>
+                          <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Log Hours</label>
                           <input 
                             type="number"
                             step="0.5"
@@ -308,62 +308,62 @@ export default function Sidebar({
                             max="24"
                             value={selectedTicket.timelog}
                             onChange={(e) => handleUpdateTicket(selectedTicket.id, 'timelog', parseFloat(e.target.value) || 0)}
-                            className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none font-mono"
+                            className="w-full bg-zinc-950 border border-zinc-800/80 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none font-mono"
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Date</label>
+                          <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Date</label>
                           <input 
                             type="date"
                             value={selectedTicket.date}
                             onChange={(e) => handleUpdateTicket(selectedTicket.id, 'date', e.target.value)}
-                            className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2 text-xs text-white focus:outline-none font-mono"
+                            className="w-full bg-zinc-950 border border-zinc-800/80 rounded-lg py-1.5 px-2 text-xs text-white focus:outline-none font-mono"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Remark / Progress Comments</label>
+                        <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Remark / Progress Comments</label>
                         <textarea 
                           rows={2}
                           value={selectedTicket.remark}
                           onChange={(e) => handleUpdateTicket(selectedTicket.id, 'remark', e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none resize-none"
+                          className="w-full bg-zinc-950 border border-zinc-800/80 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none resize-none"
                           placeholder="Daily updates..."
                         />
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-slate-900/40 p-6 rounded-xl border border-slate-800 text-center text-slate-400 text-xs">
+                  <div className="bg-zinc-900/40 p-6 rounded-lg border border-zinc-800 text-center text-zinc-400 text-xs">
                     Please select a Ticket above to configure details or log hours.
                   </div>
                 )}
 
                 {/* Quick Add Ticket Card */}
-                <div className="p-4 bg-slate-900/40 border border-slate-850 rounded-xl space-y-3">
-                  <h3 className="text-xs font-bold text-slate-350">Quick Log New Ticket</h3>
+                <div className="p-4 bg-zinc-900/40 border border-zinc-800/80 rounded-lg space-y-3">
+                  <h3 className="text-xs font-bold text-zinc-350">Quick Log New Ticket</h3>
                   <div className="grid grid-cols-2 gap-2">
                     <input 
                       type="text" 
                       placeholder="Ticket Key (e.g. JIRA-105)" 
                       value={newTicketIdLocal} 
                       onChange={(e) => setNewTicketIdLocal(e.target.value.toUpperCase())}
-                      className="bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none font-mono"
+                      className="bg-zinc-950 border border-zinc-800/80 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none font-mono"
                     />
                     <input 
                       type="text" 
                       placeholder="Activity Title" 
                       value={newTicketTitleLocal} 
                       onChange={(e) => setNewTicketTitleLocal(e.target.value)}
-                      className="bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none"
+                      className="bg-zinc-950 border border-zinc-800/80 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <select 
                       value={newTicketAssigneeLocal} 
                       onChange={(e) => setNewTicketAssigneeLocal(e.target.value)}
-                      className="bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-1.5 text-xs text-white focus:outline-none"
+                      className="bg-zinc-950 border border-zinc-800/80 rounded-lg py-1.5 px-1.5 text-xs text-white focus:outline-none"
                     >
                       <option value="">Select Assignee...</option>
                       {teamMembers.map((m) => (
@@ -373,7 +373,7 @@ export default function Sidebar({
                     <select 
                       value={newTicketStatusLocal} 
                       onChange={(e) => setNewTicketStatusLocal(e.target.value as any)}
-                      className="bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-1.5 text-xs text-white focus:outline-none"
+                      className="bg-zinc-950 border border-zinc-800/80 rounded-lg py-1.5 px-1.5 text-xs text-white focus:outline-none"
                     >
                       <option value="To Do">To Do</option>
                       <option value="In Progress">In Progress</option>
@@ -386,7 +386,7 @@ export default function Sidebar({
                       type="date" 
                       value={newTicketDateLocal} 
                       onChange={(e) => setNewTicketDateLocal(e.target.value)}
-                      className="bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none font-mono"
+                      className="bg-zinc-950 border border-zinc-800/80 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none font-mono"
                     />
                     <input 
                       type="number" 
@@ -395,7 +395,7 @@ export default function Sidebar({
                       min="0"
                       value={newTicketHoursLocal || ''} 
                       onChange={(e) => setNewTicketHoursLocal(parseFloat(e.target.value) || 0)}
-                      className="bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none font-mono"
+                      className="bg-zinc-950 border border-zinc-800/80 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none font-mono"
                     />
                   </div>
                   <div>
@@ -404,7 +404,7 @@ export default function Sidebar({
                       placeholder="Status remarks..." 
                       value={newTicketRemarkLocal} 
                       onChange={(e) => setNewTicketRemarkLocal(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none"
+                      className="w-full bg-zinc-950 border border-zinc-800/80 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none"
                     />
                   </div>
                   <button 
@@ -426,7 +426,7 @@ export default function Sidebar({
                       setNewTicketHoursLocal(0);
                       setNewTicketDateLocal(new Date().toISOString().split('T')[0]);
                     }}
-                    className="w-full py-2 bg-indigo-650 hover:bg-indigo-550 active:scale-98 transition rounded-xl font-bold text-xs text-center text-white flex items-center justify-center gap-1.5 shadow"
+                    className="w-full py-2 bg-indigo-650 hover:bg-indigo-550 active:scale-98 transition rounded-lg font-bold text-xs text-center text-white flex items-center justify-center gap-1.5 shadow"
                   >
                     <Plus className="w-4 h-4" />
                     Log Ticket Daily Task
@@ -438,13 +438,13 @@ export default function Sidebar({
                 {/* Milestone Node List Row Controllers */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">Roadmap Nodes</h2>
-                    <span className="text-xs text-slate-500 font-mono">{milestones.length} stages declared</span>
+                    <h2 className="text-xs font-bold tracking-widest text-zinc-400 uppercase">Roadmap Nodes</h2>
+                    <span className="text-xs text-zinc-500 font-mono">{milestones.length} stages declared</span>
                   </div>
 
-                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1 bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/80">
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1 bg-zinc-900/40 p-2.5 rounded-lg border border-zinc-800/80">
                     {milestones.length === 0 ? (
-                      <div className="text-center py-6 text-slate-500 text-xs">
+                      <div className="text-center py-6 text-zinc-500 text-xs">
                         No milestones yet. Click "+ Add New Milestone Button" below.
                       </div>
                     ) : (
@@ -457,7 +457,7 @@ export default function Sidebar({
                             className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer border transition ${
                               isFocused 
                                 ? 'bg-indigo-950/25 border-indigo-500/40 text-white' 
-                                : 'bg-slate-900 hover:bg-slate-800/80 border-transparent text-slate-350'
+                                : 'bg-zinc-900 hover:bg-zinc-800/80 border-transparent text-zinc-350'
                             }`}
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
@@ -469,7 +469,7 @@ export default function Sidebar({
                               <button 
                                 onClick={(e) => { e.stopPropagation(); handleMoveMilestone(idx, 'up'); }}
                                 disabled={idx === 0}
-                                className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-slate-800 text-slate-400 bg-transparent border-0 cursor-pointer"
+                                className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-zinc-800 text-zinc-400 bg-transparent border-0 cursor-pointer"
                                 title="Move Rank Up"
                               >
                                 <ArrowUp className="w-3.5 h-3.5" />
@@ -477,14 +477,14 @@ export default function Sidebar({
                               <button 
                                 onClick={(e) => { e.stopPropagation(); handleMoveMilestone(idx, 'down'); }}
                                 disabled={idx === milestones.length - 1}
-                                className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-slate-800 text-slate-400 bg-transparent border-0 cursor-pointer"
+                                className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-zinc-800 text-zinc-400 bg-transparent border-0 cursor-pointer"
                                 title="Move Rank Down"
                               >
                                 <ArrowDown className="w-3.5 h-3.5" />
                               </button>
                               <button 
                                 onClick={(e) => handleDeleteMilestone(m.id, e)}
-                                className="p-1 hover:text-rose-450 rounded hover:bg-slate-800 text-slate-500 bg-transparent border-0 cursor-pointer"
+                                className="p-1 hover:text-rose-450 rounded hover:bg-zinc-800 text-zinc-500 bg-transparent border-0 cursor-pointer"
                                 title="Delete Milestone"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -498,7 +498,7 @@ export default function Sidebar({
 
                   <button 
                     onClick={handleAddMilestone}
-                    className="mt-3 w-full py-2 px-3 bg-indigo-650 hover:bg-indigo-550 active:scale-98 transition rounded-xl font-bold text-xs text-center text-white flex items-center justify-center gap-1.5 shadow"
+                    className="mt-3 w-full py-2 px-3 bg-indigo-650 hover:bg-indigo-550 active:scale-98 transition rounded-lg font-bold text-xs text-center text-white flex items-center justify-center gap-1.5 shadow"
                   >
                     <Plus className="w-4 h-4" />
                     Add New Milestone Node
@@ -507,10 +507,10 @@ export default function Sidebar({
 
                 {/* Focus Item Detail Configuration Form Panel */}
                 {selectedMilestone ? (
-                  <div className="border border-slate-800 bg-slate-900/60 p-4 rounded-xl space-y-4 shadow-sm font-sans">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                  <div className="border border-zinc-800 bg-zinc-900/60 p-4 rounded-lg space-y-4 shadow-sm font-sans">
+                    <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
                       <div className="flex items-center gap-2">
-                        <span className="p-1 rounded bg-slate-800 text-indigo-400 font-mono text-[9px] uppercase tracking-wider font-bold">CONFIGURING</span>
+                        <span className="p-1 rounded bg-zinc-800 text-indigo-400 font-mono text-[9px] uppercase tracking-wider font-bold">CONFIGURING</span>
                         <h3 className="font-bold text-xs text-white truncate max-w-[180px]">{selectedMilestone.title}</h3>
                       </div>
                       <button 
@@ -528,22 +528,22 @@ export default function Sidebar({
                       {/* Main Title & Subtitle */}
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Title</label>
+                          <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Title</label>
                           <input 
                             type="text"
                             value={selectedMilestone.title}
                             onChange={(e) => handleUpdateMilestone(selectedMilestone.id, 'title', e.target.value)}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
                             placeholder="Sprint Stage"
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Subtitle / Date Range</label>
+                          <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Subtitle / Date Range</label>
                           <input 
                             type="text"
                             value={selectedMilestone.subtitle}
                             onChange={(e) => handleUpdateMilestone(selectedMilestone.id, 'subtitle', e.target.value)}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
                             placeholder="[20-25 June]"
                           />
                         </div>
@@ -551,8 +551,8 @@ export default function Sidebar({
 
                       {/* Icon Selector list */}
                       <div className="space-y-1">
-                        <label className="block text-[10px] font-bold text-slate-400 uppercase">Stage Node Icon Class</label>
-                        <div className="grid grid-cols-6 gap-1 bg-slate-950 p-1.5 rounded-lg border border-slate-800/80">
+                        <label className="block text-[10px] font-bold text-zinc-400 uppercase">Stage Node Icon Class</label>
+                        <div className="grid grid-cols-6 gap-1 bg-zinc-950 p-1.5 rounded-lg border border-zinc-800/80">
                           {(['lock', 'traffic-light', 'warning', 'clipboard', 'check', 'sparkles'] as IconType[]).map((icon) => (
                             <button
                               key={icon}
@@ -560,8 +560,8 @@ export default function Sidebar({
                               onClick={() => handleUpdateMilestone(selectedMilestone.id, 'icon', icon)}
                               className={`py-1.5 rounded flex items-center justify-center text-xs font-semibold capitalize border transition ${
                                 selectedMilestone.icon === icon 
-                                  ? 'bg-slate-800 border-indigo-500/50 text-indigo-400' 
-                                  : 'border-transparent text-slate-400 hover:bg-slate-900/60'
+                                  ? 'bg-zinc-800 border-indigo-500/50 text-indigo-400' 
+                                  : 'border-transparent text-zinc-400 hover:bg-zinc-900/60'
                               }`}
                               title={icon}
                             >
@@ -574,17 +574,17 @@ export default function Sidebar({
                       {/* Custom State colors */}
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">State Status Text</label>
+                          <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">State Status Text</label>
                           <input 
                             type="text"
                             value={selectedMilestone.status}
                             onChange={(e) => handleUpdateMilestone(selectedMilestone.id, 'status', e.target.value)}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500"
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Preset Theme status color</label>
+                          <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Preset Theme status color</label>
                           <select
                             value={selectedMilestone.statusBg + '|' + selectedMilestone.statusText}
                             onChange={(e) => {
@@ -592,7 +592,7 @@ export default function Sidebar({
                               handleUpdateMilestone(selectedMilestone.id, 'statusBg', bg);
                               handleUpdateMilestone(selectedMilestone.id, 'statusText', text);
                             }}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-lg py-1.5 px-2 text-xs text-white focus:outline-none"
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg py-1.5 px-2 text-xs text-white focus:outline-none"
                           >
                             {STATUS_COLORS.map((col) => (
                               <option key={col.bg} value={col.bg + '|' + col.text}>{col.name}</option>
@@ -608,9 +608,9 @@ export default function Sidebar({
                             type="checkbox"
                             checked={selectedMilestone.isHighlighted}
                             onChange={(e) => handleUpdateMilestone(selectedMilestone.id, 'isHighlighted', e.target.checked)}
-                            className="w-4 h-4 text-indigo-600 bg-slate-950 border-slate-800 rounded focus:ring-indigo-500"
+                            className="w-4 h-4 text-indigo-600 bg-zinc-950 border-zinc-800 rounded focus:ring-indigo-500"
                           />
-                          <span className="text-[10px] font-bold text-slate-350 uppercase">Highlight Node (Red Line Connector Accent)</span>
+                          <span className="text-[10px] font-bold text-zinc-350 uppercase">Highlight Node (Red Line Connector Accent)</span>
                         </label>
 
                         <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -618,22 +618,22 @@ export default function Sidebar({
                             type="checkbox"
                             checked={selectedMilestone.hideStatus || false}
                             onChange={(e) => handleUpdateMilestone(selectedMilestone.id, 'hideStatus', e.target.checked)}
-                            className="w-4 h-4 text-indigo-600 bg-slate-950 border-slate-800 rounded focus:ring-indigo-500"
+                            className="w-4 h-4 text-indigo-600 bg-zinc-950 border-zinc-800 rounded focus:ring-indigo-500"
                           />
-                          <span className="text-[10px] font-bold text-slate-350 uppercase">Hide Status Badge</span>
+                          <span className="text-[10px] font-bold text-zinc-350 uppercase">Hide Status Badge</span>
                         </label>
                       </div>
 
                       {/* Owner Badges Assignee Area */}
-                      <div className="border-t border-slate-800/85 pt-3 space-y-2">
+                      <div className="border-t border-zinc-800/85 pt-3 space-y-2">
                         <div className="flex justify-between items-center">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase">Assigned Badges ({selectedMilestone.assignees.length})</span>
+                          <span className="text-[10px] font-bold text-zinc-400 uppercase">Assigned Badges ({selectedMilestone.assignees.length})</span>
                         </div>
 
                         {/* List current assignees */}
                         <div className="flex flex-wrap gap-1.5">
                           {selectedMilestone.assignees.length === 0 ? (
-                            <span className="text-[10px] text-slate-500 italic">No resource badges attached to node</span>
+                            <span className="text-[10px] text-zinc-500 italic">No resource badges attached to node</span>
                           ) : (
                             selectedMilestone.assignees.map((assignee) => (
                               <div 
@@ -657,13 +657,13 @@ export default function Sidebar({
                         </div>
 
                         {/* Add Assignee Input Panel */}
-                        <div className="p-2.5 bg-slate-950/70 border border-slate-800 rounded-xl space-y-2">
-                          <p className="text-[10px] text-slate-400 font-bold">New Owner Badge Setup</p>
+                        <div className="p-2.5 bg-zinc-950/70 border border-zinc-800 rounded-lg space-y-2">
+                          <p className="text-[10px] text-zinc-400 font-bold">New Owner Badge Setup</p>
                           <div className="flex gap-2">
                             <select 
                               value={newAssigneeName}
                               onChange={(e) => setNewAssigneeName(e.target.value)}
-                              className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                              className="flex-grow bg-zinc-900 border border-zinc-800 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                             >
                               <option value="">Select Developer...</option>
                               {teamMembers.map((m) => (
@@ -673,7 +673,7 @@ export default function Sidebar({
                             <button
                               type="button"
                               onClick={() => handleAddAssignee(selectedMilestone.id)}
-                              className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-xs font-bold text-white whitespace-nowrap active:scale-95 transition"
+                              className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-xs font-bold text-white whitespace-nowrap active:scale-98 transition"
                             >
                               Assign
                             </button>
@@ -685,7 +685,7 @@ export default function Sidebar({
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-slate-900/40 p-6 rounded-xl border border-slate-800 text-center text-slate-400 text-xs">
+                  <div className="bg-zinc-900/40 p-6 rounded-lg border border-zinc-800 text-center text-zinc-400 text-xs">
                     Please insert or select a Milestone Node above to view block configuration form.
                   </div>
                 )}
@@ -693,17 +693,17 @@ export default function Sidebar({
             ) : (
               <>
                 {/* Capacity Dates Selection */}
-                <div className="space-y-3 border-b border-slate-800/80 pb-4 mb-4">
+                <div className="space-y-3 border-b border-zinc-800/80 pb-4 mb-4">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">Capacity Dates</h2>
-                    <span className="text-xs text-slate-500 font-mono">{capacityDates.length} selected</span>
+                    <h2 className="text-xs font-bold tracking-widest text-zinc-400 uppercase">Capacity Dates</h2>
+                    <span className="text-xs text-zinc-500 font-mono">{capacityDates.length} selected</span>
                   </div>
 
                   <div className="flex gap-2">
                     <input 
                       type="date"
                       id="capacity-date-picker"
-                      className="flex-grow bg-slate-950 border border-slate-850 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none font-mono"
+                      className="flex-grow bg-zinc-950 border border-zinc-800/80 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none font-mono"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           const val = (e.target as HTMLInputElement).value;
@@ -722,27 +722,27 @@ export default function Sidebar({
                           setCapacityDates([...capacityDates, val].sort());
                         }
                       }}
-                      className="px-3 py-1.5 bg-indigo-650 hover:bg-indigo-550 active:scale-95 transition rounded-lg text-xs font-bold text-white whitespace-nowrap"
+                      className="px-3 py-1.5 bg-indigo-650 hover:bg-indigo-550 active:scale-98 transition rounded-lg text-xs font-bold text-white whitespace-nowrap"
                     >
                       Add Date
                     </button>
                   </div>
 
                   {/* Selected Dates List */}
-                  <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-1.5 bg-slate-950/40 rounded-lg border border-slate-800/80">
+                  <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto p-1.5 bg-zinc-950/40 rounded-lg border border-zinc-800/80">
                     {capacityDates.length === 0 ? (
-                      <span className="text-[10px] text-slate-500 italic p-0.5">No dates selected. Showing global capacity.</span>
+                      <span className="text-[10px] text-zinc-500 italic p-0.5">No dates selected. Showing global capacity.</span>
                     ) : (
                       capacityDates.map((d) => (
                         <div 
                           key={d}
-                          className="px-2 py-0.5 rounded bg-slate-800 text-slate-200 text-xs font-mono flex items-center gap-1 border border-slate-700/50"
+                          className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-200 text-xs font-mono flex items-center gap-1 border border-zinc-750/50"
                         >
                           <span>{d}</span>
                           <button
                             type="button"
                             onClick={() => setCapacityDates(capacityDates.filter(x => x !== d))}
-                            className="text-slate-400 hover:text-slate-250 font-bold ml-1 text-[11px] focus:outline-none"
+                            className="text-zinc-400 hover:text-zinc-250 font-bold ml-1 text-[11px] focus:outline-none"
                           >
                             ×
                           </button>
@@ -754,7 +754,7 @@ export default function Sidebar({
                   {/* Quick-add toggle based on existing ticket dates */}
                   {Array.from(new Set(tickets.map(t => t.date))).length > 0 && (
                     <div className="space-y-1">
-                      <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Quick Select (Dates with Active Logged Tickets)</p>
+                      <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Quick Select (Dates with Active Logged Tickets)</p>
                       <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto">
                         {Array.from(new Set(tickets.map(t => t.date)))
                           .sort()
@@ -774,7 +774,7 @@ export default function Sidebar({
                                 className={`px-2 py-0.5 rounded text-[9px] font-mono border transition ${
                                   isSelected 
                                     ? 'bg-indigo-950/40 border-indigo-500/40 text-indigo-300' 
-                                    : 'bg-slate-900 border-transparent text-slate-400 hover:bg-slate-850 hover:text-slate-350'
+                                    : 'bg-zinc-900 border-transparent text-zinc-400 hover:bg-zinc-800/80 hover:text-zinc-350'
                                 }`}
                               >
                                 {d}
@@ -791,7 +791,7 @@ export default function Sidebar({
                       <button
                         type="button"
                         onClick={() => setCapacityDates([])}
-                        className="text-[9px] text-slate-500 hover:text-rose-400 font-bold uppercase tracking-wider focus:outline-none"
+                        className="text-[9px] text-zinc-500 hover:text-rose-400 font-bold uppercase tracking-wider focus:outline-none"
                       >
                         Clear All Dates
                       </button>
@@ -802,13 +802,13 @@ export default function Sidebar({
                 {/* Select Developers */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase">Select Developers</h2>
-                    <span className="text-xs text-slate-500 font-mono">{selectedDeveloperIds.length} of {teamMembers.length} selected</span>
+                    <h2 className="text-xs font-bold tracking-widest text-zinc-400 uppercase">Select Developers</h2>
+                    <span className="text-xs text-zinc-500 font-mono">{selectedDeveloperIds.length} of {teamMembers.length} selected</span>
                   </div>
 
-                  <div className="space-y-2 bg-slate-900/40 p-2.5 rounded-xl border border-slate-800/80 max-h-[60vh] overflow-y-auto">
+                  <div className="space-y-2 bg-zinc-900/40 p-2.5 rounded-lg border border-zinc-800/80 max-h-[60vh] overflow-y-auto">
                     {teamMembers.length === 0 ? (
-                      <div className="text-center py-6 text-slate-500 text-xs">
+                      <div className="text-center py-6 text-zinc-500 text-xs">
                         No developers found. Go to the "Developers" tab to add them.
                       </div>
                     ) : (
@@ -831,11 +831,11 @@ export default function Sidebar({
                             }}
                             className={`flex items-center gap-3 p-2.5 rounded-lg border transition cursor-grab active:cursor-grabbing ${
                               isDraggedOver 
-                                ? 'border-indigo-500 bg-slate-850 ring-2 ring-indigo-500/20' 
-                                : 'bg-slate-900 border-slate-800 hover:bg-slate-850'
+                                ? 'border-indigo-500 bg-zinc-800/80 ring-2 ring-indigo-500/20' 
+                                : 'bg-zinc-900 border-zinc-800 hover:bg-zinc-800/80'
                             }`}
                           >
-                            <GripVertical className="w-3.5 h-3.5 text-slate-500 hover:text-slate-300 shrink-0" />
+                            <GripVertical className="w-3.5 h-3.5 text-zinc-500 hover:text-zinc-300 shrink-0" />
                             <input 
                               type="checkbox"
                               checked={isChecked}
@@ -847,7 +847,7 @@ export default function Sidebar({
                                   setSelectedDeveloperIds([...selectedDeveloperIds, member.id]);
                                 }
                               }}
-                              className="w-4 h-4 text-indigo-600 bg-slate-950 border-slate-800 rounded focus:ring-indigo-500 focus:ring-2 focus:ring-offset-slate-900 cursor-pointer"
+                              className="w-4 h-4 text-indigo-600 bg-zinc-950 border-zinc-800 rounded focus:ring-indigo-500 focus:ring-2 focus:ring-offset-slate-900 cursor-pointer"
                             />
                             <label htmlFor={`checkbox-dev-${member.id}`} className="flex-grow cursor-pointer select-none">
                               <div className="flex items-center gap-1.5">
@@ -855,9 +855,9 @@ export default function Sidebar({
                                   className="w-2 h-2 rounded-full inline-block shrink-0" 
                                   style={{ backgroundColor: member.color || '#2580eb' }} 
                                 />
-                                <p className="font-semibold text-xs text-slate-200">{member.name}</p>
+                                <p className="font-semibold text-xs text-zinc-200">{member.name}</p>
                               </div>
-                              <p className="text-[9px] text-slate-400 uppercase tracking-wider font-bold ml-3.5">{member.role}</p>
+                              <p className="text-[9px] text-zinc-400 uppercase tracking-wider font-bold ml-3.5">{member.role}</p>
                             </label>
                             {capacityDates.length > 0 && (
                               <div className="flex items-center gap-1 shrink-0" title={showGlobalCapacityDevIds.includes(member.id) ? "Showing Global Capacity (Check to show dynamic dates capacity)" : "Showing Dynamic Dates Capacity (Uncheck to show global capacity)"}>
@@ -872,12 +872,12 @@ export default function Sidebar({
                                       setShowGlobalCapacityDevIds([...showGlobalCapacityDevIds, member.id]);
                                     }
                                   }}
-                                  className="w-3 h-3 text-indigo-600 bg-slate-950 border-slate-800 rounded focus:ring-indigo-500 cursor-pointer"
+                                  className="w-3 h-3 text-indigo-600 bg-zinc-950 border-zinc-800 rounded focus:ring-indigo-500 cursor-pointer"
                                 />
-                                <label htmlFor={`checkbox-dyn-${member.id}`} className="text-[9px] text-slate-450 font-bold uppercase select-none cursor-pointer">Dyn</label>
+                                <label htmlFor={`checkbox-dyn-${member.id}`} className="text-[9px] text-zinc-450 font-bold uppercase select-none cursor-pointer">Dyn</label>
                               </div>
                             )}
-                            <span className="text-xs font-mono font-bold text-slate-400 select-none">{member.utilization}%</span>
+                            <span className="text-xs font-mono font-bold text-zinc-400 select-none">{member.utilization}%</span>
                           </div>
                         );
                       })
@@ -892,82 +892,82 @@ export default function Sidebar({
 
         {activeTab === 'styles' && (
           <div className="space-y-4">
-            <h2 className="text-xs font-bold tracking-widest text-slate-400 uppercase font-display">Style &amp; Appearance</h2>
+            <h2 className="text-xs font-bold tracking-widest text-zinc-400 uppercase font-display">Style &amp; Appearance</h2>
             
             {appMode === 'roadmap' ? (
               <>
                 {/* Title */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Roadmap Main Header Title</label>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase">Roadmap Main Header Title</label>
                   <input 
                     type="text"
                     value={config.title}
                     onChange={(e) => setConfig({ ...config, title: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
                     placeholder="MILESTONE ROADMAP"
                   />
                 </div>
 
                 {/* Timeline axis line color */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Timeline Axis Color</label>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase">Timeline Axis Color</label>
                   <div className="flex gap-2">
                     <input 
                       type="color"
                       value={config.timelineColor}
                       onChange={(e) => setConfig({ ...config, timelineColor: e.target.value })}
-                      className="w-10 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
+                      className="w-10 h-8 rounded border border-zinc-800 bg-transparent cursor-pointer"
                     />
                     <input 
                       type="text"
                       value={config.timelineColor}
                       onChange={(e) => setConfig({ ...config, timelineColor: e.target.value })}
-                      className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+                      className="flex-grow bg-zinc-900 border border-zinc-800 rounded-lg py-1 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
                     />
                   </div>
                 </div>
 
                 {/* Card Background Color picker */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Card Frame Fill Color</label>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase">Card Frame Fill Color</label>
                   <div className="flex gap-2">
                     <input 
                       type="color"
                       value={config.cardBg}
                       onChange={(e) => setConfig({ ...config, cardBg: e.target.value })}
-                      className="w-10 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
+                      className="w-10 h-8 rounded border border-zinc-800 bg-transparent cursor-pointer"
                     />
                     <input 
                       type="text"
                       value={config.cardBg}
                       onChange={(e) => setConfig({ ...config, cardBg: e.target.value })}
-                      className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-3 text-xs text-white font-mono"
+                      className="flex-grow bg-zinc-900 border border-zinc-800 rounded-lg py-1 px-3 text-xs text-white font-mono"
                     />
                   </div>
                 </div>
 
                 {/* Card Border Customization */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Card Outer Outline Border Color</label>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase">Card Outer Outline Border Color</label>
                   <div className="flex gap-2">
                     <input 
                       type="color"
                       value={config.cardBorder}
                       onChange={(e) => setConfig({ ...config, cardBorder: e.target.value })}
-                      className="w-10 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
+                      className="w-10 h-8 rounded border border-zinc-800 bg-transparent cursor-pointer"
                     />
                     <input 
                       type="text"
                       value={config.cardBorder}
                       onChange={(e) => setConfig({ ...config, cardBorder: e.target.value })}
-                      className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-3 text-xs text-white font-mono"
+                      className="flex-grow bg-zinc-900 border border-zinc-800 rounded-lg py-1 px-3 text-xs text-white font-mono"
                     />
                   </div>
                 </div>
 
                 {/* Hide Status Pills Option */}
                 <div className="space-y-1.5 pt-1">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Status Badge Visibility</label>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase">Status Badge Visibility</label>
                   <div className="flex items-center">
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input 
@@ -976,8 +976,8 @@ export default function Sidebar({
                         onChange={(e) => setConfig({ ...config, hideStatus: e.target.checked })}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 peer-checked:after:bg-white"></div>
-                      <span className="ml-2 text-xs text-slate-300 font-medium">
+                      <div className="w-11 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 peer-checked:after:bg-white"></div>
+                      <span className="ml-2 text-xs text-zinc-300 font-medium">
                         {config.hideStatus ? 'Status pills hidden from view/export' : 'Status pills visible on cards'}
                       </span>
                     </label>
@@ -986,11 +986,11 @@ export default function Sidebar({
 
                 {/* Milestones per Card (Group Size) Selection */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase font-sans">Milestones Per Card (Group Size)</label>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase font-sans">Milestones Per Card (Group Size)</label>
                   <select
                     value={config.groupSize || 0}
                     onChange={(e) => setConfig({ ...config, groupSize: parseInt(e.target.value) || 0 })}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
                   >
                     <option value={0}>Show all in a single card</option>
                     <option value={1}>1 milestone per card</option>
@@ -1005,61 +1005,61 @@ export default function Sidebar({
               <>
                 {/* Title */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Capacity Main Header Title</label>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase">Capacity Main Header Title</label>
                   <input 
                     type="text"
                     value={capacityConfig.title}
                     onChange={(e) => setCapacityConfig({ ...capacityConfig, title: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-1.5 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
                     placeholder="TEAM CAPACITY"
                   />
                 </div>
 
                 {/* Card Background Color */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Card Background Color</label>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase">Card Background Color</label>
                   <div className="flex gap-2">
                     <input 
                       type="color"
                       value={capacityConfig.cardBg}
                       onChange={(e) => setCapacityConfig({ ...capacityConfig, cardBg: e.target.value })}
-                      className="w-10 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
+                      className="w-10 h-8 rounded border border-zinc-800 bg-transparent cursor-pointer"
                     />
                     <input 
                       type="text"
                       value={capacityConfig.cardBg}
                       onChange={(e) => setCapacityConfig({ ...capacityConfig, cardBg: e.target.value })}
-                      className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-3 text-xs text-white font-mono"
+                      className="flex-grow bg-zinc-900 border border-zinc-800 rounded-lg py-1 px-3 text-xs text-white font-mono"
                     />
                   </div>
                 </div>
 
                 {/* Card Border Color */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Card Border Color</label>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase">Card Border Color</label>
                   <div className="flex gap-2">
                     <input 
                       type="color"
                       value={capacityConfig.cardBorder}
                       onChange={(e) => setCapacityConfig({ ...capacityConfig, cardBorder: e.target.value })}
-                      className="w-10 h-8 rounded border border-slate-800 bg-transparent cursor-pointer"
+                      className="w-10 h-8 rounded border border-zinc-800 bg-transparent cursor-pointer"
                     />
                     <input 
                       type="text"
                       value={capacityConfig.cardBorder}
                       onChange={(e) => setCapacityConfig({ ...capacityConfig, cardBorder: e.target.value })}
-                      className="flex-grow bg-slate-900 border border-slate-800 rounded-lg py-1 px-3 text-xs text-white font-mono"
+                      className="flex-grow bg-zinc-900 border border-zinc-800 rounded-lg py-1 px-3 text-xs text-white font-mono"
                     />
                   </div>
                 </div>
 
                 {/* Developers per Card (Group Size) Selection */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase font-sans">Developers Per Card (Group Size)</label>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase font-sans">Developers Per Card (Group Size)</label>
                   <select
                     value={capacityConfig.groupSize || 0}
                     onChange={(e) => setCapacityConfig({ ...capacityConfig, groupSize: parseInt(e.target.value) || 0 })}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-1.5 px-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition"
                   >
                     <option value={0}>Show all in a single card</option>
                     <option value={1}>1 developer per card</option>
@@ -1071,7 +1071,7 @@ export default function Sidebar({
                 </div>
               </>
             ) : (
-              <div className="text-center py-6 text-slate-500 text-xs italic">
+              <div className="text-center py-6 text-zinc-500 text-xs italic">
                 No custom styles available for ticket board canvas.
               </div>
             )}
@@ -1080,10 +1080,10 @@ export default function Sidebar({
       </div>
 
       {/* Prompt/Instructions Area */}
-      <div className="p-4 border-t border-slate-800 bg-slate-950/90 text-[11px] text-slate-400 space-y-2 shrink-0">
+      <div className="p-4 border-t border-zinc-800 bg-zinc-950/90 text-[11px] text-zinc-400 space-y-2 shrink-0">
         <div className="flex gap-1.5 items-start text-indigo-300">
           <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-          <p className="font-semibold text-slate-300">Figma-Ready Assets</p>
+          <p className="font-semibold text-zinc-300">Figma-Ready Assets</p>
         </div>
         <p className="leading-relaxed">
           Every detail is drawn with pure client-side vectors. Clicking <strong className="text-white">Export Vector SVG</strong> saves an infinitely-scalable vector asset ready for directly dropping into presentation slides or design files.

@@ -1,4 +1,5 @@
-import { Sliders, RotateCcw, Download, Users, FileJson, Upload, Settings } from 'lucide-react';
+import { Sliders, RotateCcw, Download, Users, FileJson, Upload, Settings, ChevronDown } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 
 interface HeaderProps {
   handleResetToDefault: () => void;
@@ -17,6 +18,19 @@ export default function Header({
   handleExportJSON,
   handleImportJSON
 }: HeaderProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -26,7 +40,7 @@ export default function Header({
       try {
         const json = JSON.parse(evt.target?.result as string);
         handleImportJSON(json);
-      } catch (err) {
+      } catch {
         alert('Invalid JSON file format!');
       }
     };
@@ -35,72 +49,99 @@ export default function Header({
   };
 
   return (
-    <header className="border-b border-slate-800 bg-slate-950 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shrink-0 shadow-lg relative z-20">
-      <div className="flex items-center gap-3">
-        <div className="p-2.5 bg-[#1a235a] border border-[#2d3a82] text-teal-300 rounded-xl shadow-inner">
-          <Sliders className="w-6 h-6" />
+    <header className="border-b border-zinc-800 bg-zinc-950 px-5 py-0 h-14 flex items-center justify-between shrink-0 relative z-20">
+      {/* Left: Logo + Title */}
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center justify-center w-8 h-8 bg-zinc-900 border border-zinc-800 rounded-lg shrink-0">
+          <Sliders className="w-4 h-4 text-zinc-300" />
         </div>
-        <div>
+        <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold tracking-tight text-white font-display">Sprint Capacity &amp; Roadmap Studio</h1>
-            <span className="px-2 py-0.5 text-[10px] bg-indigo-500/20 text-indigo-300 font-bold tracking-wider rounded-md uppercase border border-indigo-500/30">v1.2</span>
+            <h1 className="text-sm font-semibold tracking-tight text-zinc-100 truncate font-display">
+              Sprint Capacity &amp; Roadmap Studio
+            </h1>
+            <span className="hidden sm:inline-block px-1.5 py-0.5 text-[9px] bg-zinc-800 text-zinc-500 font-semibold tracking-wider rounded border border-zinc-700/60 uppercase shrink-0">
+              v1.2
+            </span>
           </div>
-          <p className="text-xs text-slate-400">Design, customize values, and capture high-resolution roadmap and team capacity graphics interactively</p>
+          <p className="hidden md:block text-[11px] text-zinc-500 truncate">
+            Design and export high-resolution roadmap graphics
+          </p>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2.5">
-        <button 
+      {/* Right: Actions */}
+      <div className="flex items-center gap-2 shrink-0">
+        {/* Icon-only buttons for secondary actions */}
+        <button
           onClick={onOpenDeveloperModal}
-          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 hover:text-white transition flex items-center gap-1.5 active:scale-95"
+          title="Manage Developers"
+          className="h-8 w-8 flex items-center justify-center rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 border border-zinc-800 transition-colors cursor-pointer"
         >
-          <Users className="w-3.5 h-3.5 text-indigo-400" />
-          Manage Developers
+          <Users className="w-4 h-4" />
         </button>
 
-        <button 
+        <button
           onClick={onOpenSettingsModal}
-          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 hover:text-white transition flex items-center gap-1.5 active:scale-95"
+          title="Global Settings"
+          className="h-8 w-8 flex items-center justify-center rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 border border-zinc-800 transition-colors cursor-pointer"
         >
-          <Settings className="w-3.5 h-3.5 text-indigo-400" />
-          Global Settings
+          <Settings className="w-4 h-4" />
         </button>
 
-        <button 
-          onClick={handleExportJSON}
-          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 hover:text-white transition flex items-center gap-1.5 active:scale-95"
-          title="Export full data as JSON"
-        >
-          <FileJson className="w-3.5 h-3.5 text-indigo-400" />
-          Export JSON
-        </button>
+        <div className="h-5 w-px bg-zinc-800" />
 
-        <label className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 hover:text-white transition flex items-center gap-1.5 active:scale-95 cursor-pointer">
-          <Upload className="w-3.5 h-3.5 text-indigo-400" />
-          Import JSON
-          <input 
-            type="file" 
-            accept=".json" 
-            onChange={handleFileChange} 
-            className="hidden" 
-          />
-        </label>
+        {/* More dropdown for JSON import/export/reset */}
+        <div className="relative" ref={menuRef}>
+          <button
+            onClick={() => setMenuOpen(v => !v)}
+            className="h-8 px-3 flex items-center gap-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 border border-zinc-800 transition-colors text-xs font-medium cursor-pointer"
+          >
+            More
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${menuOpen ? 'rotate-180' : ''}`} />
+          </button>
 
-        <button 
-          onClick={handleResetToDefault}
-          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 hover:text-white transition flex items-center gap-1.5 active:scale-95"
-          title="Reset to image reference state"
-        >
-          <RotateCcw className="w-3.5 h-3.5" />
-          Reset to Reference Mockup
-        </button>
-        
-        <button 
+          {menuOpen && (
+            <div className="absolute right-0 mt-1.5 w-48 bg-zinc-900 border border-zinc-800 rounded-xl shadow-xl overflow-hidden z-50">
+              <div className="py-1">
+                <button
+                  onClick={() => { handleExportJSON(); setMenuOpen(false); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 transition-colors cursor-pointer"
+                >
+                  <FileJson className="w-3.5 h-3.5 text-zinc-500" />
+                  Export JSON
+                </button>
+                <label className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 transition-colors cursor-pointer">
+                  <Upload className="w-3.5 h-3.5 text-zinc-500" />
+                  Import JSON
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".json"
+                    onChange={(e) => { handleFileChange(e); setMenuOpen(false); }}
+                    className="hidden"
+                  />
+                </label>
+                <div className="h-px bg-zinc-800 my-1" />
+                <button
+                  onClick={() => { handleResetToDefault(); setMenuOpen(false); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-zinc-400 hover:text-red-400 hover:bg-zinc-800 transition-colors cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Reset Mockup
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Primary CTA */}
+        <button
           onClick={handleExportSVG}
-          className="px-4 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-950/20 transition flex items-center gap-1.5 active:scale-95"
+          className="h-8 px-4 flex items-center gap-1.5 rounded-lg bg-white hover:bg-zinc-100 text-zinc-900 text-xs font-semibold shadow-sm transition-colors cursor-pointer"
         >
-          <Download className="w-4 h-4" />
-          Export Vector SVG
+          <Download className="w-3.5 h-3.5" />
+          Export SVG
         </button>
       </div>
     </header>

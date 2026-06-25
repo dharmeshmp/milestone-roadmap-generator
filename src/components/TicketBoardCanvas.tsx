@@ -66,7 +66,7 @@ export default function TicketBoardCanvas({
           e.stopPropagation();
           setSelectedTicketId(ticket.id);
         }}
-        className={`bg-white border-2 rounded-xl p-4 cursor-grab active:cursor-grabbing transition-all duration-200 select-none flex flex-col justify-between gap-3 relative overflow-hidden shrink-0 ${
+        className={`bg-white border-2 rounded-lg p-4 cursor-grab active:cursor-grabbing transition-all duration-200 select-none flex flex-col justify-between gap-3 relative overflow-hidden shrink-0 ${
           isSelected 
             ? 'border-indigo-600 shadow-md ring-2 ring-indigo-500/20' 
             : 'border-slate-200 hover:border-indigo-300 hover:shadow-sm'
@@ -74,7 +74,7 @@ export default function TicketBoardCanvas({
       >
         <div className="space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded uppercase tracking-wider">
+            <span className="text-[10px] font-bold font-mono text-zinc-400 bg-slate-100 px-1.5 py-0.5 rounded uppercase tracking-wider">
               {ticket.id}
             </span>
             {ticket.timelog > 0 && (
@@ -90,7 +90,7 @@ export default function TicketBoardCanvas({
         </div>
 
         {ticket.remark && (
-          <p className="text-[11px] text-slate-500 bg-slate-50 border-l-2 border-slate-300 pl-2 py-1 italic line-clamp-2 rounded-r-md">
+          <p className="text-[11px] text-zinc-500 bg-slate-50 border-l-2 border-slate-300 pl-2 py-1 italic line-clamp-2 rounded-r-md">
             "{ticket.remark}"
           </p>
         )}
@@ -107,8 +107,8 @@ export default function TicketBoardCanvas({
               </>
             ) : (
               <>
-                <User className="w-3.5 h-3.5 text-slate-400" />
-                <span className="text-xs text-slate-400 italic">Unassigned</span>
+                <User className="w-3.5 h-3.5 text-zinc-400" />
+                <span className="text-xs text-zinc-400 italic">Unassigned</span>
               </>
             )}
           </div>
@@ -131,12 +131,12 @@ export default function TicketBoardCanvas({
               JIRA TICKETS &amp; TIMELOGS
             </h2>
           </div>
-          <p className="text-xs text-slate-400 mt-1">Daily project tasks, status monitoring, and engineer logs</p>
+          <p className="text-xs text-zinc-400 mt-1">Daily project tasks, status monitoring, and engineer logs</p>
         </div>
 
         {/* Date Selector input */}
-        <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl shrink-0">
-          <Calendar className="w-4 h-4 text-slate-500" />
+        <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg shrink-0">
+          <Calendar className="w-4 h-4 text-zinc-500" />
           <input 
             type="date"
             value={selectedDate}
@@ -154,7 +154,7 @@ export default function TicketBoardCanvas({
           onDragEnter={() => setDraggedOverColumn('To Do')}
           onDragLeave={() => setDraggedOverColumn(null)}
           onDrop={(e) => { handleDrop(e, 'To Do'); setDraggedOverColumn(null); }}
-          className={`rounded-2xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[300px] ${
+          className={`rounded-xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[300px] ${
             draggedOverColumn === 'To Do' 
               ? 'border-indigo-400 ring-2 ring-indigo-400/20 bg-indigo-50/5' 
               : 'bg-slate-550 bg-slate-50/75 border-slate-200/50'
@@ -165,13 +165,13 @@ export default function TicketBoardCanvas({
               <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
               To Do
             </span>
-            <span className="text-xs font-mono bg-slate-200/80 px-2 py-0.5 rounded-full font-bold text-slate-600">
+            <span className="text-xs font-mono bg-slate-200/80 px-2 py-0.5 rounded-full font-bold text-zinc-650">
               {todoTickets.length}
             </span>
           </div>
           <div className="flex flex-col gap-3 overflow-y-auto max-h-[50vh] pr-0.5">
             {todoTickets.length === 0 ? (
-              <div className="text-center py-10 text-slate-400 text-xs italic">No tickets in To Do</div>
+              <div className="text-center py-10 text-zinc-400 text-xs italic">No tickets in To Do</div>
             ) : (
               todoTickets.map(renderTicketCard)
             )}
@@ -184,7 +184,7 @@ export default function TicketBoardCanvas({
           onDragEnter={() => setDraggedOverColumn('In Progress')}
           onDragLeave={() => setDraggedOverColumn(null)}
           onDrop={(e) => { handleDrop(e, 'In Progress'); setDraggedOverColumn(null); }}
-          className={`rounded-2xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[300px] ${
+          className={`rounded-xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[300px] ${
             draggedOverColumn === 'In Progress' 
               ? 'border-indigo-400 ring-2 ring-indigo-400/20 bg-indigo-50/15' 
               : 'bg-indigo-50/20 border-indigo-100/50'
@@ -201,7 +201,7 @@ export default function TicketBoardCanvas({
           </div>
           <div className="flex flex-col gap-3 overflow-y-auto max-h-[50vh] pr-0.5">
             {inProgressTickets.length === 0 ? (
-              <div className="text-center py-10 text-slate-400 text-xs italic">No tickets in progress</div>
+              <div className="text-center py-10 text-zinc-400 text-xs italic">No tickets in progress</div>
             ) : (
               inProgressTickets.map(renderTicketCard)
             )}
@@ -214,7 +214,7 @@ export default function TicketBoardCanvas({
           onDragEnter={() => setDraggedOverColumn('Reassigned')}
           onDragLeave={() => setDraggedOverColumn(null)}
           onDrop={(e) => { handleDrop(e, 'Reassigned'); setDraggedOverColumn(null); }}
-          className={`rounded-2xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[300px] ${
+          className={`rounded-xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[300px] ${
             draggedOverColumn === 'Reassigned' 
               ? 'border-amber-400 ring-2 ring-amber-400/20 bg-amber-50/15' 
               : 'bg-amber-50/20 border-amber-100/30'
@@ -231,7 +231,7 @@ export default function TicketBoardCanvas({
           </div>
           <div className="flex flex-col gap-3 overflow-y-auto max-h-[50vh] pr-0.5">
             {reassignedTickets.length === 0 ? (
-              <div className="text-center py-10 text-slate-400 text-xs italic">No reassigned tickets</div>
+              <div className="text-center py-10 text-zinc-400 text-xs italic">No reassigned tickets</div>
             ) : (
               reassignedTickets.map(renderTicketCard)
             )}
@@ -244,7 +244,7 @@ export default function TicketBoardCanvas({
           onDragEnter={() => setDraggedOverColumn('Done')}
           onDragLeave={() => setDraggedOverColumn(null)}
           onDrop={(e) => { handleDrop(e, 'Done'); setDraggedOverColumn(null); }}
-          className={`rounded-2xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[300px] ${
+          className={`rounded-xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[300px] ${
             draggedOverColumn === 'Done' 
               ? 'border-emerald-400 ring-2 ring-emerald-400/20 bg-emerald-50/15' 
               : 'bg-emerald-50/20 border-emerald-100/30'
@@ -261,7 +261,7 @@ export default function TicketBoardCanvas({
           </div>
           <div className="flex flex-col gap-3 overflow-y-auto max-h-[50vh] pr-0.5">
             {doneTickets.length === 0 ? (
-              <div className="text-center py-10 text-slate-400 text-xs italic">No tickets completed</div>
+              <div className="text-center py-10 text-zinc-400 text-xs italic">No tickets completed</div>
             ) : (
               doneTickets.map(renderTicketCard)
             )}
@@ -270,7 +270,7 @@ export default function TicketBoardCanvas({
       </div>
 
       {/* Timelog summary footer */}
-      <div className="border-t border-slate-100 pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500 font-mono">
+      <div className="border-t border-slate-100 pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-zinc-500 font-mono">
         <div className="flex items-center gap-1.5">
           <Clock className="w-4 h-4 text-indigo-500" />
           <span>Daily Total Hours Logged: <strong className="text-[#1a235a]">{totalHours} hrs</strong></span>

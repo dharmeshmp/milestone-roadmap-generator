@@ -153,7 +153,7 @@ export default function CapacityCanvas({
   if (activeMembers.length === 0) {
     return (
       <div 
-        className="bg-white text-slate-900 rounded-3xl p-12 text-center text-slate-400 italic border border-slate-200"
+        className="bg-white text-slate-900 rounded-3xl p-12 text-center text-zinc-400 italic border border-slate-200"
         style={{ backgroundColor: capacityConfig.cardBg, borderColor: capacityConfig.cardBorder, borderWidth: '2px' }}
       >
         Select developers in the sidebar to visualize capacity.
@@ -190,7 +190,7 @@ export default function CapacityCanvas({
                 <button
                   type="button"
                   onClick={() => handleExportGroupSVG(groupIndex, groupMembers)}
-                  className="flex items-center gap-1 px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-[#4f46e5] rounded-xl text-[10px] font-extrabold uppercase tracking-wider transition active:scale-95 cursor-pointer border border-indigo-100/60"
+                  className="flex items-center gap-1 px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-[#4f46e5] rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition active:scale-98 cursor-pointer border border-indigo-100/60"
                   title="Download this card as SVG"
                 >
                   <Download className="w-3.5 h-3.5" />
@@ -198,7 +198,7 @@ export default function CapacityCanvas({
                 </button>
               </div>
               {capacityDates && capacityDates.length > 0 && (
-                <div className="text-[11px] text-slate-500 font-mono mt-1">
+                <div className="text-[11px] text-zinc-500 font-mono mt-1">
                   Dates: {capacityDates.join(', ')} ({capacityDates.length * 8}h capacity)
                 </div>
               )}
@@ -209,7 +209,7 @@ export default function CapacityCanvas({
             </div>
 
             {/* Column Headers */}
-            <div className="grid grid-cols-[1.5fr_1.5fr_1.2fr] sm:grid-cols-[1.8fr_1.5fr_1.5fr] gap-4 pb-3 border-b border-slate-200/60 text-xs font-bold tracking-wider text-slate-400 uppercase font-mono">
+            <div className="grid grid-cols-[1.5fr_1.5fr_1.2fr] sm:grid-cols-[1.8fr_1.5fr_1.5fr] gap-4 pb-3 border-b border-slate-200/60 text-xs font-bold tracking-wider text-zinc-400 uppercase font-mono">
               <div>Engineer</div>
               <div>Role</div>
               <div className="text-right">Utilisation</div>
@@ -237,7 +237,7 @@ export default function CapacityCanvas({
                   <div
                     key={member.id}
                     onClick={() => setSelectedTeamMemberId(member.id)}
-                    className={`p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${
+                    className={`p-4 rounded-xl border transition-all duration-300 cursor-pointer ${
                       isSelected 
                         ? 'bg-slate-55/80 border-[#1a235a] shadow-md ring-2 ring-indigo-500/10' 
                         : 'bg-slate-50/30 border-transparent hover:bg-slate-50/60'
@@ -269,7 +269,7 @@ export default function CapacityCanvas({
                           style={{ width: `${Math.min(member.utilization, 100)}%` }}
                         />
                       </div>
-                      <div className="flex justify-between items-center text-[10px] text-slate-400 font-medium">
+                      <div className="flex justify-between items-center text-[10px] text-zinc-400 font-medium">
                         <span>0%</span>
                         <span className={`font-semibold uppercase tracking-wider ${textColor}`}>{statusLabel}</span>
                         <span>100%+</span>
@@ -281,7 +281,7 @@ export default function CapacityCanvas({
             </div>
 
             {/* Thresholds Legend Keys */}
-            <div className="mt-8 pt-4 border-t border-slate-100 flex flex-wrap gap-x-6 gap-y-2 justify-center sm:justify-start text-xs font-semibold text-slate-500">
+            <div className="mt-8 pt-4 border-t border-slate-100 flex flex-wrap gap-x-6 gap-y-2 justify-center sm:justify-start text-xs font-semibold text-zinc-500">
               <div className="flex items-center gap-1.5">
                 <span className="w-3.5 h-3.5 rounded bg-teal-600 inline-block" />
                 <span>Available (&lt;{capacityConfig.greenThreshold}%)</span>

@@ -831,25 +831,25 @@ function App() {
 
   const getCanvasBgClass = () => {
     switch (globalConfig.canvasBg) {
-      case 'light': return 'bg-white';
-      case 'grid': return 'bg-[#f8fafc] bg-grid-pattern';
-      case 'dark': return 'bg-slate-900 bg-dark-grid-pattern';
-      case 'slate': return 'bg-slate-100';
-      default: return 'bg-slate-550';
+      case 'light': return 'bg-zinc-50/50';
+      case 'grid': return 'bg-zinc-950 bg-grid-pattern';
+      case 'dark': return 'bg-zinc-950 bg-dark-grid-pattern';
+      case 'slate': return 'bg-zinc-900';
+      default: return 'bg-zinc-950';
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans antialiased overflow-x-hidden">
+    <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col font-sans antialiased overflow-x-hidden">
       
       {/* Dynamic Transient Notification Banner */}
       {notification && (
-        <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-2xl flex items-center gap-3 transition-all duration-300 text-sm max-w-sm border ${
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center gap-3 transition-all duration-300 text-sm max-w-sm border ${
           notification.type === 'success' 
-            ? 'bg-slate-800 border-emerald-500/30 text-emerald-300' 
-            : 'bg-slate-800 border-rose-500/30 text-rose-300'
+            ? 'bg-zinc-900 border-emerald-500/30 text-emerald-300' 
+            : 'bg-zinc-900 border-rose-500/30 text-rose-300'
         }`}>
-          {notification.type === 'success' ? <Check className="w-5 h-5 text-emerald-400 flex-shrink-0" /> : <Info className="w-5 h-5 text-rose-400 flex-shrink-0" />}
+          {notification.type === 'success' ? <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" /> : <Info className="w-4 h-4 text-rose-400 flex-shrink-0" />}
           <div>
             <p className="font-semibold">{notification.message}</p>
           </div>
@@ -867,36 +867,36 @@ function App() {
       />
 
       {/* View Mode Mode Segmented Control Bar */}
-      <div className="bg-slate-900 border-b border-slate-800/80 px-6 py-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shrink-0">
+      <div className="bg-zinc-900/40 border-b border-zinc-800/80 px-6 py-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shrink-0">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="p-1.5 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-xl text-slate-400 hover:text-white transition flex items-center justify-center gap-1 active:scale-95 cursor-pointer"
+            className="p-1.5 bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-400 hover:text-zinc-200 transition flex items-center justify-center gap-1 active:scale-98 cursor-pointer"
             title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
           >
             {isSidebarCollapsed ? (
               <>
-                <ChevronRight className="w-4 h-4 text-indigo-400" />
-                <span className="text-[10px] font-bold pr-1">Show Sidebar</span>
+                <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
+                <span className="text-[10px] font-semibold pr-1">Show Sidebar</span>
               </>
             ) : (
               <>
-                <ChevronLeft className="w-4 h-4" />
-                <span className="text-[10px] font-bold pr-1">Hide Sidebar</span>
+                <ChevronLeft className="w-3.5 h-3.5 text-zinc-400" />
+                <span className="text-[10px] font-semibold pr-1">Hide Sidebar</span>
               </>
             )}
           </button>
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-xs font-bold text-slate-350 uppercase tracking-widest font-mono">WORKSPACE FORMATTER</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono">WORKSPACE FORMATTER</span>
         </div>
         
-        <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 gap-1 sm:self-end">
+        <div className="flex bg-zinc-950 p-0.5 rounded-lg border border-zinc-850 gap-0.5 sm:self-end">
           <button
             onClick={() => setAppMode('roadmap')}
-            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 active:scale-95 ${
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition flex items-center gap-1.5 active:scale-98 cursor-pointer ${
               appMode === 'roadmap'
-                ? 'bg-indigo-600 text-white shadow'
-                : 'text-slate-400 hover:bg-slate-900 hover:text-slate-250'
+                ? 'bg-zinc-900 text-zinc-100 shadow-sm border border-zinc-800'
+                : 'text-zinc-400 hover:text-zinc-200 border border-transparent'
             }`}
           >
             <Sliders className="w-3.5 h-3.5" />
@@ -904,25 +904,25 @@ function App() {
           </button>
           <button
             onClick={() => setAppMode('capacity')}
-            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 active:scale-95 ${
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition flex items-center gap-1.5 active:scale-98 cursor-pointer ${
               appMode === 'capacity'
-                ? 'bg-indigo-600 text-white shadow'
-                : 'text-slate-400 hover:bg-slate-900 hover:text-slate-250'
+                ? 'bg-zinc-900 text-zinc-100 shadow-sm border border-zinc-800'
+                : 'text-zinc-400 hover:text-zinc-200 border border-transparent'
             }`}
           >
             <Users className="w-3.5 h-3.5" />
-            Team Capacity Visualizer
+            Team Capacity
           </button>
           <button
             onClick={() => setAppMode('tickets')}
-            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 active:scale-95 ${
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition flex items-center gap-1.5 active:scale-98 cursor-pointer ${
               appMode === 'tickets'
-                ? 'bg-indigo-600 text-white shadow'
-                : 'text-slate-400 hover:bg-slate-900 hover:text-slate-250'
+                ? 'bg-zinc-900 text-zinc-100 shadow-sm border border-zinc-800'
+                : 'text-zinc-400 hover:text-zinc-200 border border-transparent'
             }`}
           >
             <Users className="w-3.5 h-3.5" />
-            JIRA Tickets &amp; Timelogs
+            JIRA Tickets
           </button>
         </div>
       </div>
@@ -976,10 +976,10 @@ function App() {
           <div className="w-full max-w-3xl">
             
             {/* Interactive help bar above preview */}
-            <div className="mb-3 flex items-center justify-between text-xs text-slate-500 font-mono">
+            <div className="mb-3 flex items-center justify-between text-xs text-zinc-500 font-mono">
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                <span>Live Rendering Preview Area</span>
+                <span>Live Rendering Preview</span>
               </div>
               <div>
                 <span>Click cards below to select/edit</span>
@@ -1017,8 +1017,8 @@ function App() {
             )}
 
             {/* Hint overlay */}
-            <p className="mt-4 text-center text-xs text-slate-500 leading-relaxed max-w-md mx-auto">
-              Tip: Customize the title, timeline branch connector colors, card backgrounds, and core statuses instantly inside the sidebar controls.
+            <p className="mt-4 text-center text-xs text-zinc-500 leading-relaxed max-w-md mx-auto">
+              Tip: Customize titles, branch line connections, card backgrounds, and task columns instantly via the sidebar panel.
             </p>
 
           </div>
