@@ -670,16 +670,16 @@ function App() {
 
         {/* Right Side: Interactive Preview Canvas stage */}
         <section className={`flex-grow p-6 md:p-10 overflow-y-auto flex items-start justify-center transition-colors duration-300 ${getCanvasBgClass()}`}>
-          <div className="w-full max-w-3xl">
+          <div className={`w-full ${appMode === 'tickets' ? 'max-w-7xl' : 'max-w-3xl'}`}>
             
             {/* Interactive help bar above preview */}
             <div className="mb-3 flex items-center justify-between text-xs text-zinc-500 font-mono">
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                <span>Live Rendering Preview</span>
+                <span>{appMode === 'tickets' ? 'Daily Kanban Workspace' : 'Live Rendering Preview'}</span>
               </div>
               <div>
-                <span>Click cards below to select/edit</span>
+                <span>{appMode === 'tickets' ? 'Drag & Drop cards to update status' : 'Click cards below to select/edit'}</span>
               </div>
             </div>
 
