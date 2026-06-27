@@ -3,7 +3,6 @@ import { useState, useRef, useEffect } from 'react';
 
 interface HeaderProps {
   handleResetToDefault: () => void;
-  handleExportSVG: () => void;
   onOpenDeveloperModal: () => void;
   onOpenSettingsModal: () => void;
   handleExportJSON: () => void;
@@ -12,7 +11,6 @@ interface HeaderProps {
 
 export default function Header({ 
   handleResetToDefault, 
-  handleExportSVG, 
   onOpenDeveloperModal,
   onOpenSettingsModal,
   handleExportJSON,
@@ -134,15 +132,6 @@ export default function Header({
             </div>
           )}
         </div>
-
-        {/* Primary CTA */}
-        <button
-          onClick={handleExportSVG}
-          className="h-8 px-4 flex items-center gap-1.5 rounded-lg bg-white hover:bg-zinc-100 text-zinc-900 text-xs font-semibold shadow-sm transition-colors cursor-pointer"
-        >
-          <Download className="w-3.5 h-3.5" />
-          Export SVG
-        </button>
       </div>
     </header>
   );

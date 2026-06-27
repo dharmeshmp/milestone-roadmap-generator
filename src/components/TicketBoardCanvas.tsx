@@ -1,6 +1,7 @@
 import React from 'react';
 import { Clipboard, Clock, MessageSquare, Calendar, ChevronRight, User } from 'lucide-react';
 import { JiraTicket, TeamMember } from '../types';
+import { CanvasCard, Badge, EmptyState } from './ui';
 
 interface TicketBoardCanvasProps {
   tickets: JiraTicket[];
@@ -74,9 +75,7 @@ export default function TicketBoardCanvas({
       >
         <div className="space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold font-mono text-zinc-400 bg-slate-100 px-1.5 py-0.5 rounded uppercase tracking-wider">
-              {ticket.id}
-            </span>
+            <Badge variant="mono">{ticket.id}</Badge>
             {ticket.timelog > 0 && (
               <span className="flex items-center gap-1 text-[10px] font-bold text-indigo-600 bg-indigo-55/60 px-2 py-0.5 rounded-full border border-indigo-100">
                 <Clock className="w-3 h-3" />
@@ -118,12 +117,9 @@ export default function TicketBoardCanvas({
   };
 
   return (
-    <div 
-      id="tickets-board-canvas"
-      className="bg-white text-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-200/60 overflow-hidden flex flex-col gap-6"
-    >
+    <CanvasCard id="tickets-board-canvas" className="flex flex-col gap-6">
       {/* Header controls for Date filter */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
         <div>
           <div className="flex items-center gap-2">
             <Clipboard className="w-5 h-5 text-[#1a235a]" />
@@ -171,7 +167,7 @@ export default function TicketBoardCanvas({
           </div>
           <div className="flex flex-col gap-3 overflow-y-auto max-h-[50vh] pr-0.5">
             {todoTickets.length === 0 ? (
-              <div className="text-center py-10 text-zinc-400 text-xs italic">No tickets in To Do</div>
+              <EmptyState>No tickets in To Do</EmptyState>
             ) : (
               todoTickets.map(renderTicketCard)
             )}
@@ -201,7 +197,7 @@ export default function TicketBoardCanvas({
           </div>
           <div className="flex flex-col gap-3 overflow-y-auto max-h-[50vh] pr-0.5">
             {inProgressTickets.length === 0 ? (
-              <div className="text-center py-10 text-zinc-400 text-xs italic">No tickets in progress</div>
+              <EmptyState>No tickets in progress</EmptyState>
             ) : (
               inProgressTickets.map(renderTicketCard)
             )}
@@ -231,7 +227,7 @@ export default function TicketBoardCanvas({
           </div>
           <div className="flex flex-col gap-3 overflow-y-auto max-h-[50vh] pr-0.5">
             {reassignedTickets.length === 0 ? (
-              <div className="text-center py-10 text-zinc-400 text-xs italic">No reassigned tickets</div>
+              <EmptyState>No reassigned tickets</EmptyState>
             ) : (
               reassignedTickets.map(renderTicketCard)
             )}
@@ -261,7 +257,7 @@ export default function TicketBoardCanvas({
           </div>
           <div className="flex flex-col gap-3 overflow-y-auto max-h-[50vh] pr-0.5">
             {doneTickets.length === 0 ? (
-              <div className="text-center py-10 text-zinc-400 text-xs italic">No tickets completed</div>
+              <EmptyState>No tickets completed</EmptyState>
             ) : (
               doneTickets.map(renderTicketCard)
             )}
@@ -279,6 +275,6 @@ export default function TicketBoardCanvas({
           <span>Filtered Date: <strong className="text-slate-700">{selectedDate}</strong></span>
         </div>
       </div>
-    </div>
+    </CanvasCard>
   );
 }
