@@ -1,8 +1,8 @@
 import React from 'react';
 import { AlertTriangle, ClipboardList, Calendar, CheckSquare, Sparkles } from 'lucide-react';
 import { Milestone, RoadmapConfig, TeamMember, IconType } from '../types';
-import { CanvasCard, CanvasHeader, DownloadSVGButton, Badge, EmptyState } from './ui';
-import { exportElementAsPNG } from '@/lib/exportCanvas';
+import { CanvasCard, CanvasHeader, DownloadButton, Badge, EmptyState } from './ui';
+import { exportElement } from '@/lib/exportCanvas';
 
 interface RoadmapCanvasProps {
   milestones: Milestone[];
@@ -89,13 +89,13 @@ export default function RoadmapCanvas({
 
   const milestoneGroups = chunkArray(milestones, groupSize);
 
-  const handleExportGroupSVG = async (groupIndex: number) => {
+  const handleExportGroup = async (groupIndex: number, format: 'png' | 'svg') => {
     const displayTitle =
       config.groupSize && config.groupSize > 0
         ? `${config.title} - Group ${groupIndex + 1}`
         : config.title;
     const fileName = displayTitle.toLowerCase().replace(/\s+/g, '_') + '_roadmap';
-    await exportElementAsPNG(`milestones-roadmap-canvas-${groupIndex}`, fileName);
+    await exportElement(`milestones-roadmap-canvas-${groupIndex}`, fileName, format);
   };
 
 
@@ -115,7 +115,7 @@ export default function RoadmapCanvas({
           >
             <CanvasHeader
               title={displayTitle}
-              action={<DownloadSVGButton onClick={() => handleExportGroupSVG(groupIndex)} />}
+              action={<DownloadButton onDownload={(format) => handleExportGroup(groupIndex, format)} />}
             />
 
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { TeamMember, CapacityConfig } from '../types';
-import { CanvasCard, CanvasHeader, DownloadSVGButton, Badge, EmptyState } from './ui';
-import { exportElementAsPNG } from '@/lib/exportCanvas';
+import { CanvasCard, CanvasHeader, DownloadButton, Badge, EmptyState } from './ui';
+import { exportElement } from '@/lib/exportCanvas';
 
 interface CapacityCanvasProps {
   teamMembers: TeamMember[];
@@ -35,13 +35,13 @@ export default function CapacityCanvas({
 
   const memberGroups = chunkArray(activeMembers, groupSize);
 
-  const handleExportGroupSVG = async (groupIndex: number) => {
+  const handleExportGroup = async (groupIndex: number, format: 'png' | 'svg') => {
     const displayTitle =
       groupSize > 0
         ? `${capacityConfig.title} - Group ${groupIndex + 1}`
         : capacityConfig.title;
     const fileName = displayTitle.toLowerCase().replace(/\s+/g, '_');
-    await exportElementAsPNG(`team-capacity-canvas-${groupIndex}`, fileName);
+    await exportElement(`team-capacity-canvas-${groupIndex}`, fileName, format);
   };
 
   if (activeMembers.length === 0) {
@@ -81,7 +81,7 @@ export default function CapacityCanvas({
           >
             <CanvasHeader
               title={displayTitle}
-              action={<DownloadSVGButton onClick={() => handleExportGroupSVG(groupIndex)} />}
+              action={<DownloadButton onDownload={(format) => handleExportGroup(groupIndex, format)} />}
             >
               {capacityDates && capacityDates.length > 0 && (
                 <span>Dates: {capacityDates.join(', ')} ({capacityDates.length * 8}h capacity)</span>

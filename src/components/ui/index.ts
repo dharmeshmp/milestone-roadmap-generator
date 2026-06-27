@@ -10,5 +10,6 @@
 export { CanvasCard } from './CanvasCard';
 export { CanvasHeader } from './CanvasHeader';
 export { DownloadSVGButton } from './DownloadSVGButton';
+export { DownloadButton } from './DownloadButton';
 export { Badge } from './Badge';
 export { EmptyState } from './EmptyState';

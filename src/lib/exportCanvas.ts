@@ -1,24 +1,26 @@
-import { toPng } from 'html-to-image';
+import { toPng, toSvg } from 'html-to-image';
 
 /**
- * exportElementAsPNG
+ * exportElement
  *
- * Captures a DOM element as a clean PNG and triggers a download.
+ * Captures a DOM element as a clean PNG or SVG and triggers a download.
  * Temporarily removes selection rings, scale transforms, and resets border
  * colors on the live DOM before capturing, then restores them immediately after.
  *
  * @param elementId  - The `id` of the DOM element to capture.
  * @param fileName   - Suggested download filename (without extension).
+ * @param format     - Export format: 'png' | 'svg' (default 'png').
  * @param scale      - Pixel ratio for retina-quality output (default 2).
  */
-export async function exportElementAsPNG(
+export async function exportElement(
   elementId: string,
   fileName: string,
+  format: 'png' | 'svg' = 'png',
   scale = 2,
 ): Promise<void> {
   const el = document.getElementById(elementId);
   if (!el) {
-    console.error(`[exportElementAsPNG] Element #${elementId} not found.`);
+    console.error(`[exportElement] Element #${elementId} not found.`);
     return;
   }
 
@@ -117,17 +119,19 @@ export async function exportElementAsPNG(
   document.head.appendChild(resetStyle);
 
   try {
-    const dataUrl = await toPng(el, {
+    const options = {
       pixelRatio: scale,
       backgroundColor: '#ffffff',
       filter: (node: HTMLElement) => {
         return !(node instanceof HTMLElement && node.dataset.exportIgnore === 'true');
       },
-    });
+    };
+
+    const dataUrl = format === 'svg' ? await toSvg(el, options) : await toPng(el, options);
 
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = `${fileName}.png`;
+    link.download = `${fileName}.${format}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -139,4 +143,15 @@ export async function exportElementAsPNG(
     });
     document.head.removeChild(resetStyle);
   }
+}
+
+/**
+ * backwards-compatible wrapper for exportElementAsPNG
+ */
+export async function exportElementAsPNG(
+  elementId: string,
+  fileName: string,
+  scale = 2,
+): Promise<void> {
+  return exportElement(elementId, fileName, 'png', scale);
 }
