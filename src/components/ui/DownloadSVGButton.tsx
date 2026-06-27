@@ -10,7 +10,7 @@ interface DownloadSVGButtonProps {
  * DownloadSVGButton — indigo ghost button used inside canvas headers
  * to trigger per-group SVG export.
  */
-export function DownloadSVGButton({ onClick, label = 'Download SVG' }: DownloadSVGButtonProps) {
+export function DownloadSVGButton({ onClick, label = 'Download Image' }: DownloadSVGButtonProps) {
   return (
     <button
       type="button"
