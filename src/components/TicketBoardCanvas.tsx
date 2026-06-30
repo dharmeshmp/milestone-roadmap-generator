@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clipboard, Clock, Calendar, User } from 'lucide-react';
+import { Clipboard, Clock, Calendar, User, LayoutGrid, List } from 'lucide-react';
 import { JiraTicket, TeamMember } from '../types';
 import { Badge, EmptyState } from './ui';
 
@@ -23,6 +23,19 @@ export default function TicketBoardCanvas({
   handleUpdateTicket,
 }: TicketBoardCanvasProps) {
   
+  // State for view mode (board or list)
+  const [viewMode, setViewMode] = React.useState<'board' | 'list'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('jira_board_view_mode');
+      return (saved as 'board' | 'list') || 'board';
+    }
+    return 'board';
+  });
+
+  React.useEffect(() => {
+    localStorage.setItem('jira_board_view_mode', viewMode);
+  }, [viewMode]);
+
   // State for dragging column feedback
   const [draggedOverColumn, setDraggedOverColumn] = React.useState<'To Do' | 'In Progress' | 'Reassigned' | 'Done' | null>(null);
 
@@ -132,140 +145,288 @@ export default function TicketBoardCanvas({
           <p className="text-xs text-zinc-400 mt-1">Daily project tasks, status monitoring, and engineer logs</p>
         </div>
 
-        {/* Date Selector input */}
-        <div className="flex items-center gap-2.5 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-lg shrink-0">
-          <Calendar className="w-4 h-4 text-zinc-400" />
-          <input 
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="bg-transparent text-xs font-bold text-zinc-100 focus:outline-none border-0 cursor-pointer font-mono [color-scheme:dark]"
-          />
+        {/* View mode toggle and Date Selector */}
+        <div className="flex items-center gap-3 shrink-0">
+          {/* View switcher toggle */}
+          <div className="flex bg-zinc-950 p-0.5 rounded-lg border border-zinc-800 gap-0.5">
+            <button
+              onClick={() => setViewMode('board')}
+              className={`p-1.5 rounded-md text-xs font-semibold transition flex items-center gap-1 active:scale-98 cursor-pointer ${
+                viewMode === 'board'
+                  ? 'bg-zinc-900 text-zinc-100 shadow-sm border border-zinc-800/80'
+                  : 'text-zinc-400 hover:text-zinc-200 border border-transparent'
+              }`}
+              title="Board View"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Board</span>
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-1.5 rounded-md text-xs font-semibold transition flex items-center gap-1 active:scale-98 cursor-pointer ${
+                viewMode === 'list'
+                  ? 'bg-zinc-900 text-zinc-100 shadow-sm border border-zinc-800/80'
+                  : 'text-zinc-400 hover:text-zinc-200 border border-transparent'
+              }`}
+              title="List View"
+            >
+              <List className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">List</span>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2.5 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-lg">
+            <Calendar className="w-4 h-4 text-zinc-400" />
+            <input 
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="bg-transparent text-xs font-bold text-zinc-100 focus:outline-none border-0 cursor-pointer font-mono [color-scheme:dark]"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Kanban Grid Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* Column 1: To Do */}
-        <div 
-          onDragOver={(e) => e.preventDefault()}
-          onDragEnter={() => setDraggedOverColumn('To Do')}
-          onDragLeave={() => setDraggedOverColumn(null)}
-          onDrop={(e) => { handleDrop(e, 'To Do'); setDraggedOverColumn(null); }}
-          className={`rounded-xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[400px] ${
-            draggedOverColumn === 'To Do' 
-              ? 'border-indigo-500/50 ring-2 ring-indigo-500/20 bg-zinc-900/60' 
-              : 'bg-zinc-900/40 border-zinc-850'
-          }`}
-        >
-          <div className="flex items-center justify-between pb-1">
-            <span className="text-xs font-extrabold text-zinc-450 uppercase tracking-widest flex items-center gap-1.5 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
-              To Do
-            </span>
-            <span className="text-xs font-mono bg-zinc-850 px-2.5 py-0.5 rounded-full font-bold text-zinc-400 border border-zinc-800">
-              {todoTickets.length}
-            </span>
-          </div>
-          <div className="flex flex-col gap-3 overflow-y-auto max-h-[50vh] pr-0.5">
-            {todoTickets.length === 0 ? (
-              <EmptyState className="text-zinc-500 bg-transparent border-dashed border-zinc-800">No tickets in To Do</EmptyState>
-            ) : (
-              todoTickets.map(renderTicketCard)
-            )}
-          </div>
-        </div>
+      {viewMode === 'list' ? (
+        <div className="bg-zinc-900/40 border border-zinc-850 rounded-xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left text-xs text-zinc-300">
+              <thead>
+                <tr className="bg-zinc-950/80 border-b border-zinc-850 text-zinc-400 font-mono font-bold uppercase tracking-wider text-[10px]">
+                  <th className="px-5 py-3.5 w-28">ID</th>
+                  <th className="px-5 py-3.5">Title</th>
+                  <th className="px-5 py-3.5 w-36">Status</th>
+                  <th className="px-5 py-3.5 w-44">Assignee</th>
+                  <th className="px-5 py-3.5 w-28">Logged Time</th>
+                  <th className="px-5 py-3.5 max-w-xs">Remarks</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-850/60">
+                {filteredTickets.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-5 py-12 text-center text-zinc-500 font-medium">
+                      No tickets found for {selectedDate}
+                    </td>
+                  </tr>
+                ) : (
+                  filteredTickets.map((ticket) => {
+                    const isSelected = ticket.id === selectedTicketId;
+                    const developer = getDeveloper(ticket.assignee_id);
+                    
+                    let statusColorClasses = '';
+                    switch (ticket.status) {
+                      case 'To Do':
+                        statusColorClasses = 'bg-zinc-900 text-zinc-400 border-zinc-800';
+                        break;
+                      case 'In Progress':
+                        statusColorClasses = 'bg-indigo-950/60 text-indigo-400 border-indigo-900/50';
+                        break;
+                      case 'Reassigned':
+                        statusColorClasses = 'bg-amber-950/60 text-amber-400 border-amber-900/50';
+                        break;
+                      case 'Done':
+                        statusColorClasses = 'bg-emerald-950/60 text-emerald-400 border-emerald-900/50';
+                        break;
+                    }
 
-        {/* Column 2: In Progress */}
-        <div 
-          onDragOver={(e) => e.preventDefault()}
-          onDragEnter={() => setDraggedOverColumn('In Progress')}
-          onDragLeave={() => setDraggedOverColumn(null)}
-          onDrop={(e) => { handleDrop(e, 'In Progress'); setDraggedOverColumn(null); }}
-          className={`rounded-xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[400px] ${
-            draggedOverColumn === 'In Progress' 
-              ? 'border-indigo-500/50 ring-2 ring-indigo-500/20 bg-zinc-900/60' 
-              : 'bg-indigo-950/10 border-indigo-950/40'
-          }`}
-        >
-          <div className="flex items-center justify-between pb-1">
-            <span className="text-xs font-extrabold text-indigo-400 uppercase tracking-widest flex items-center gap-1.5 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-              In Progress
-            </span>
-            <span className="text-xs font-mono bg-indigo-950/60 px-2.5 py-0.5 rounded-full font-bold text-indigo-400 border border-indigo-900/50">
-              {inProgressTickets.length}
-            </span>
-          </div>
-          <div className="flex flex-col gap-3 overflow-y-auto max-h-[50vh] pr-0.5">
-            {inProgressTickets.length === 0 ? (
-              <EmptyState className="text-zinc-500 bg-transparent border-dashed border-zinc-800">No tickets in progress</EmptyState>
-            ) : (
-              inProgressTickets.map(renderTicketCard)
-            )}
+                    return (
+                      <tr 
+                        key={ticket.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedTicketId(ticket.id);
+                        }}
+                        className={`hover:bg-zinc-900/60 cursor-pointer transition-colors duration-150 ${
+                          isSelected ? 'bg-indigo-950/15' : ''
+                        }`}
+                      >
+                        <td className="px-5 py-3.5 font-mono font-bold text-zinc-400">
+                          <div className="flex items-center gap-2">
+                            {isSelected && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0 animate-pulse" />
+                            )}
+                            <span className="bg-zinc-850 px-2 py-0.5 rounded border border-zinc-800/80">
+                              {ticket.id}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-3.5 font-semibold text-zinc-100 max-w-sm truncate">
+                          {ticket.title || 'Untitled Activity'}
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${statusColorClasses}`}>
+                            <span className={`w-1 h-1 rounded-full ${
+                              ticket.status === 'To Do' ? 'bg-zinc-500' :
+                              ticket.status === 'In Progress' ? 'bg-indigo-500 animate-pulse' :
+                              ticket.status === 'Reassigned' ? 'bg-amber-500' :
+                              'bg-emerald-500'
+                            }`} />
+                            {ticket.status}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <div className="flex items-center gap-2">
+                            {developer ? (
+                              <>
+                                <span 
+                                  className="w-2 h-2 rounded-full shrink-0"
+                                  style={{ backgroundColor: developer.color || '#2580eb' }}
+                                />
+                                <span className="font-semibold text-zinc-350 text-xs">{developer.name}</span>
+                              </>
+                            ) : (
+                              <>
+                                <User className="w-3.5 h-3.5 text-zinc-650 shrink-0" />
+                                <span className="text-zinc-500 italic text-xs">Unassigned</span>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-5 py-3.5 font-mono">
+                          {ticket.timelog > 0 ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-400 bg-indigo-950/60 px-2 py-0.5 rounded-full border border-indigo-900/50">
+                              <Clock className="w-3 h-3" />
+                              {ticket.timelog} hrs
+                            </span>
+                          ) : (
+                            <span className="text-zinc-600">-</span>
+                          )}
+                        </td>
+                        <td className="px-5 py-3.5 text-zinc-400 italic max-w-xs truncate" title={ticket.remark}>
+                          {ticket.remark ? `"${ticket.remark}"` : ''}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
+      ) : (
+        /* Kanban Grid Columns */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* Column 1: To Do */}
+          <div 
+            onDragOver={(e) => e.preventDefault()}
+            onDragEnter={() => setDraggedOverColumn('To Do')}
+            onDragLeave={() => setDraggedOverColumn(null)}
+            onDrop={(e) => { handleDrop(e, 'To Do'); setDraggedOverColumn(null); }}
+            className={`rounded-xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[400px] ${
+              draggedOverColumn === 'To Do' 
+                ? 'border-indigo-500/50 ring-2 ring-indigo-500/20 bg-zinc-900/60' 
+                : 'bg-zinc-900/40 border-zinc-850'
+            }`}
+          >
+            <div className="flex items-center justify-between pb-1">
+              <span className="text-xs font-extrabold text-zinc-450 uppercase tracking-widest flex items-center gap-1.5 font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-zinc-500" />
+                To Do
+              </span>
+              <span className="text-xs font-mono bg-zinc-850 px-2.5 py-0.5 rounded-full font-bold text-zinc-400 border border-zinc-800">
+                {todoTickets.length}
+              </span>
+            </div>
+            <div className="flex flex-col gap-3 overflow-y-auto max-h-[50vh] pr-0.5">
+              {todoTickets.length === 0 ? (
+                <EmptyState className="text-zinc-500 bg-transparent border-dashed border-zinc-800">No tickets in To Do</EmptyState>
+              ) : (
+                todoTickets.map(renderTicketCard)
+              )}
+            </div>
+          </div>
 
-        {/* Column 3: Reassigned */}
-        <div 
-          onDragOver={(e) => e.preventDefault()}
-          onDragEnter={() => setDraggedOverColumn('Reassigned')}
-          onDragLeave={() => setDraggedOverColumn(null)}
-          onDrop={(e) => { handleDrop(e, 'Reassigned'); setDraggedOverColumn(null); }}
-          className={`rounded-xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[400px] ${
-            draggedOverColumn === 'Reassigned' 
-              ? 'border-indigo-500/50 ring-2 ring-indigo-500/20 bg-zinc-900/60' 
-              : 'bg-amber-950/10 border-amber-950/30'
-          }`}
-        >
-          <div className="flex items-center justify-between pb-1">
-            <span className="text-xs font-extrabold text-amber-500 uppercase tracking-widest flex items-center gap-1.5 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-              Reassigned
-            </span>
-            <span className="text-xs font-mono bg-amber-950/60 px-2.5 py-0.5 rounded-full font-bold text-amber-400 border border-amber-900/50">
-              {reassignedTickets.length}
-            </span>
+          {/* Column 2: In Progress */}
+          <div 
+            onDragOver={(e) => e.preventDefault()}
+            onDragEnter={() => setDraggedOverColumn('In Progress')}
+            onDragLeave={() => setDraggedOverColumn(null)}
+            onDrop={(e) => { handleDrop(e, 'In Progress'); setDraggedOverColumn(null); }}
+            className={`rounded-xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[400px] ${
+              draggedOverColumn === 'In Progress' 
+                ? 'border-indigo-500/50 ring-2 ring-indigo-500/20 bg-zinc-900/60' 
+                : 'bg-indigo-950/10 border-indigo-950/40'
+            }`}
+          >
+            <div className="flex items-center justify-between pb-1">
+              <span className="text-xs font-extrabold text-indigo-400 uppercase tracking-widest flex items-center gap-1.5 font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                In Progress
+              </span>
+              <span className="text-xs font-mono bg-indigo-950/60 px-2.5 py-0.5 rounded-full font-bold text-indigo-400 border border-indigo-900/50">
+                {inProgressTickets.length}
+              </span>
+            </div>
+            <div className="flex flex-col gap-3 overflow-y-auto max-h-[50vh] pr-0.5">
+              {inProgressTickets.length === 0 ? (
+                <EmptyState className="text-zinc-500 bg-transparent border-dashed border-zinc-800">No tickets in progress</EmptyState>
+              ) : (
+                inProgressTickets.map(renderTicketCard)
+              )}
+            </div>
           </div>
-          <div className="flex flex-col gap-3 overflow-y-auto max-h-[50vh] pr-0.5">
-            {reassignedTickets.length === 0 ? (
-              <EmptyState className="text-zinc-500 bg-transparent border-dashed border-zinc-800">No reassigned tickets</EmptyState>
-            ) : (
-              reassignedTickets.map(renderTicketCard)
-            )}
-          </div>
-        </div>
 
-        {/* Column 4: Done */}
-        <div 
-          onDragOver={(e) => e.preventDefault()}
-          onDragEnter={() => setDraggedOverColumn('Done')}
-          onDragLeave={() => setDraggedOverColumn(null)}
-          onDrop={(e) => { handleDrop(e, 'Done'); setDraggedOverColumn(null); }}
-          className={`rounded-xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[400px] ${
-            draggedOverColumn === 'Done' 
-              ? 'border-indigo-500/50 ring-2 ring-indigo-500/20 bg-zinc-900/60' 
-              : 'bg-emerald-950/10 border-emerald-950/30'
-          }`}
-        >
-          <div className="flex items-center justify-between pb-1">
-            <span className="text-xs font-extrabold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              Done
-            </span>
-            <span className="text-xs font-mono bg-emerald-950/60 px-2.5 py-0.5 rounded-full font-bold text-emerald-400 border border-emerald-900/50">
-              {doneTickets.length}
-            </span>
+          {/* Column 3: Reassigned */}
+          <div 
+            onDragOver={(e) => e.preventDefault()}
+            onDragEnter={() => setDraggedOverColumn('Reassigned')}
+            onDragLeave={() => setDraggedOverColumn(null)}
+            onDrop={(e) => { handleDrop(e, 'Reassigned'); setDraggedOverColumn(null); }}
+            className={`rounded-xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[400px] ${
+              draggedOverColumn === 'Reassigned' 
+                ? 'border-indigo-500/50 ring-2 ring-indigo-500/20 bg-zinc-900/60' 
+                : 'bg-amber-950/10 border-amber-950/30'
+            }`}
+          >
+            <div className="flex items-center justify-between pb-1">
+              <span className="text-xs font-extrabold text-amber-500 uppercase tracking-widest flex items-center gap-1.5 font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                Reassigned
+              </span>
+              <span className="text-xs font-mono bg-amber-950/60 px-2.5 py-0.5 rounded-full font-bold text-amber-400 border border-amber-900/50">
+                {reassignedTickets.length}
+              </span>
+            </div>
+            <div className="flex flex-col gap-3 overflow-y-auto max-h-[50vh] pr-0.5">
+              {reassignedTickets.length === 0 ? (
+                <EmptyState className="text-zinc-500 bg-transparent border-dashed border-zinc-800">No reassigned tickets</EmptyState>
+              ) : (
+                reassignedTickets.map(renderTicketCard)
+              )}
+            </div>
           </div>
-          <div className="flex flex-col gap-3 overflow-y-auto max-h-[50vh] pr-0.5">
-            {doneTickets.length === 0 ? (
-              <EmptyState className="text-zinc-500 bg-transparent border-dashed border-zinc-800">No tickets completed</EmptyState>
-            ) : (
-              doneTickets.map(renderTicketCard)
-            )}
+
+          {/* Column 4: Done */}
+          <div 
+            onDragOver={(e) => e.preventDefault()}
+            onDragEnter={() => setDraggedOverColumn('Done')}
+            onDragLeave={() => setDraggedOverColumn(null)}
+            onDrop={(e) => { handleDrop(e, 'Done'); setDraggedOverColumn(null); }}
+            className={`rounded-xl p-4 border transition-all duration-200 flex flex-col gap-3 min-h-[400px] ${
+              draggedOverColumn === 'Done' 
+                ? 'border-indigo-500/50 ring-2 ring-indigo-500/20 bg-zinc-900/60' 
+                : 'bg-emerald-950/10 border-emerald-950/30'
+            }`}
+          >
+            <div className="flex items-center justify-between pb-1">
+              <span className="text-xs font-extrabold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5 font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                Done
+              </span>
+              <span className="text-xs font-mono bg-emerald-950/60 px-2.5 py-0.5 rounded-full font-bold text-emerald-400 border border-emerald-900/50">
+                {doneTickets.length}
+              </span>
+            </div>
+            <div className="flex flex-col gap-3 overflow-y-auto max-h-[50vh] pr-0.5">
+              {doneTickets.length === 0 ? (
+                <EmptyState className="text-zinc-500 bg-transparent border-dashed border-zinc-800">No tickets completed</EmptyState>
+              ) : (
+                doneTickets.map(renderTicketCard)
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Timelog summary footer */}
       <div className="border-t border-zinc-850 pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-zinc-500 font-mono">
