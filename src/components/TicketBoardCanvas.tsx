@@ -1,7 +1,8 @@
 import React from 'react';
-import { Clipboard, Clock, Calendar, User, LayoutGrid, List } from 'lucide-react';
+import { Clipboard, Clock, Calendar, User, LayoutGrid, List, History } from 'lucide-react';
 import { JiraTicket, TeamMember } from '../types';
 import { Badge, EmptyState } from './ui';
+import { getTicketHistory, TicketHistoryEntry } from '../app/actions/tickets';
 
 const InlineRemarkInput = ({ 
   ticketId, 
@@ -63,17 +64,27 @@ export default function TicketBoardCanvas({
   handleUpdateTicket,
 }: TicketBoardCanvasProps) {
   
-  // State for view mode (board or list)
-  const [viewMode, setViewMode] = React.useState<'board' | 'list'>(() => {
+  // State for view mode (board, list, or history)
+  const [viewMode, setViewMode] = React.useState<'board' | 'list' | 'history'>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('jira_board_view_mode');
-      return (saved as 'board' | 'list') || 'board';
+      return (saved as 'board' | 'list' | 'history') || 'board';
     }
     return 'board';
   });
 
+  const [history, setHistory] = React.useState<TicketHistoryEntry[]>([]);
+  const [loadingHistory, setLoadingHistory] = React.useState(false);
+
   React.useEffect(() => {
     localStorage.setItem('jira_board_view_mode', viewMode);
+    if (viewMode === 'history') {
+      setLoadingHistory(true);
+      getTicketHistory().then((data) => {
+        setHistory(data);
+        setLoadingHistory(false);
+      });
+    }
   }, [viewMode]);
 
   // State for dragging column feedback
@@ -213,6 +224,18 @@ export default function TicketBoardCanvas({
               <List className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">List</span>
             </button>
+            <button
+              onClick={() => setViewMode('history')}
+              className={`p-1.5 rounded-md text-xs font-semibold transition flex items-center gap-1 active:scale-98 cursor-pointer ${
+                viewMode === 'history'
+                  ? 'bg-zinc-900 text-zinc-100 shadow-sm border border-zinc-800/80'
+                  : 'text-zinc-400 hover:text-zinc-200 border border-transparent'
+              }`}
+              title="Audit Log"
+            >
+              <History className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Audit Log</span>
+            </button>
           </div>
 
           <div className="flex items-center gap-2.5 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-lg">
@@ -227,7 +250,78 @@ export default function TicketBoardCanvas({
         </div>
       </div>
 
-      {viewMode === 'list' ? (
+      {viewMode === 'history' ? (
+        <div className="bg-zinc-900/40 border border-zinc-850 rounded-xl overflow-hidden">
+          <div className="p-4 border-b border-zinc-850 bg-zinc-950/40 flex justify-between items-center">
+            <h3 className="text-xs font-extrabold text-zinc-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+              Ticket Activity Audit Log
+            </h3>
+            <span className="text-xs font-mono bg-zinc-850 px-2.5 py-0.5 rounded-full font-bold text-zinc-400 border border-zinc-800">
+              {history.length} events
+            </span>
+          </div>
+          <div className="divide-y divide-zinc-850/60 max-h-[60vh] overflow-y-auto">
+            {loadingHistory ? (
+              <div className="px-5 py-12 text-center text-zinc-500 font-medium">
+                Loading audit logs...
+              </div>
+            ) : history.length === 0 ? (
+              <div className="px-5 py-12 text-center text-zinc-500 font-medium">
+                No activity logs available yet.
+              </div>
+            ) : (
+              history.map((entry) => {
+                let actionText = '';
+                switch (entry.field) {
+                  case 'created':
+                    actionText = `Created ticket: "${entry.new_value}"`;
+                    break;
+                  case 'deleted':
+                    actionText = `Deleted ticket: "${entry.old_value}"`;
+                    break;
+                  case 'status':
+                    actionText = `Changed status from "${entry.old_value}" to "${entry.new_value}"`;
+                    break;
+                  case 'assignee_id':
+                    const oldName = entry.old_assignee || (entry.old_value === 'Unassigned' ? 'Unassigned' : entry.old_value);
+                    const newName = entry.new_assignee || (entry.new_value === 'Unassigned' ? 'Unassigned' : entry.new_value);
+                    actionText = `Changed assignee from ${oldName} to ${newName}`;
+                    break;
+                  case 'timelog':
+                    actionText = `Logged time changed from ${entry.old_value} hrs to ${entry.new_value} hrs`;
+                    break;
+                  default:
+                    actionText = `Updated ${entry.field} from "${entry.old_value}" to "${entry.new_value}"`;
+                    break;
+                }
+
+                let formattedTime = entry.timestamp;
+                try {
+                  const date = new Date(entry.timestamp);
+                  formattedTime = date.toLocaleString();
+                } catch (e) {}
+
+                return (
+                  <div key={entry.id} className="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-zinc-900/30 transition-colors">
+                    <div className="flex items-start sm:items-center gap-3">
+                      <span className="font-mono text-[10px] font-bold bg-zinc-850 px-2 py-0.5 rounded border border-zinc-800/80 text-zinc-400 shrink-0">
+                        {entry.ticket_id}
+                      </span>
+                      <span className="text-zinc-200 text-xs font-medium leading-relaxed">
+                        {actionText}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-zinc-500 font-mono self-end sm:self-auto">
+                      {formattedTime}
+                    </span>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      ) : viewMode === 'list' ? (
         <div className="bg-zinc-900/40 border border-zinc-850 rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-xs text-zinc-300">

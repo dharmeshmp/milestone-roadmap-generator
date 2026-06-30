@@ -40,6 +40,15 @@ db.exec(`
     timelog REAL DEFAULT 0.0,
     FOREIGN KEY(assignee_id) REFERENCES developers(id) ON DELETE SET NULL
   );
+
+  CREATE TABLE IF NOT EXISTS jira_ticket_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ticket_id TEXT NOT NULL,
+    field TEXT NOT NULL,
+    old_value TEXT,
+    new_value TEXT,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 // Seed initial developers if empty
