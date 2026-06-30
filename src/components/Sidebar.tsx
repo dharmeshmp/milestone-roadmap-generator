@@ -80,6 +80,7 @@ interface SidebarProps {
   handleUpdateTicket: <K extends keyof JiraTicket>(id: string, key: K, value: JiraTicket[K]) => void;
   selectedDate: string;
   handleReorderDevelopers: (orderedIds: string[]) => void;
+  handleReorderMilestones: (orderedIds: string[]) => void;
   capacityDates: string[];
   setCapacityDates: React.Dispatch<React.SetStateAction<string[]>>;
   showGlobalCapacityDevIds: string[];
@@ -116,6 +117,7 @@ export default function Sidebar({
   handleUpdateTicket,
   selectedDate,
   handleReorderDevelopers,
+  handleReorderMilestones,
   capacityDates,
   setCapacityDates,
   showGlobalCapacityDevIds,
@@ -152,6 +154,24 @@ export default function Sidebar({
     result.splice(targetIndex, 0, removed);
 
     handleReorderDevelopers(result.map(m => m.id));
+  };
+
+  // Local state for dragging milestones
+  const [draggedOverMilestoneId, setDraggedOverMilestoneId] = React.useState<string | null>(null);
+
+  const handleMilestoneDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    const draggedId = e.dataTransfer.getData('text/plain');
+    if (!draggedId) return;
+
+    const sourceIndex = milestones.findIndex(m => m.id === draggedId);
+    if (sourceIndex === -1 || sourceIndex === targetIndex) return;
+
+    const result = [...milestones];
+    const [removed] = result.splice(sourceIndex, 1);
+    result.splice(targetIndex, 0, removed);
+
+    handleReorderMilestones(result.map(m => m.id));
   };
 
   return (
@@ -450,38 +470,37 @@ export default function Sidebar({
                     ) : (
                       milestones.map((m, idx) => {
                         const isFocused = m.id === selectedMilestoneId;
+                        const isDraggedOver = draggedOverMilestoneId === m.id;
                         return (
                           <div 
                             key={m.id}
                             onClick={() => setSelectedMilestoneId(m.id)}
-                            className={`group flex items-center justify-between p-2 rounded-lg cursor-pointer border transition ${
-                              isFocused 
-                                ? 'bg-indigo-950/25 border-indigo-500/40 text-white' 
-                                : 'bg-zinc-900 hover:bg-zinc-800/80 border-transparent text-zinc-350'
+                            draggable={true}
+                            onDragStart={(e) => {
+                              e.dataTransfer.setData('text/plain', m.id);
+                            }}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDragEnter={() => setDraggedOverMilestoneId(m.id)}
+                            onDragLeave={() => setDraggedOverMilestoneId(null)}
+                            onDrop={(e) => {
+                              handleMilestoneDrop(e, idx);
+                              setDraggedOverMilestoneId(null);
+                            }}
+                            className={`group flex items-center justify-between p-2 rounded-lg cursor-grab active:cursor-grabbing border transition ${
+                              isDraggedOver
+                                ? 'border-indigo-500 bg-zinc-850 ring-2 ring-indigo-500/20'
+                                : isFocused 
+                                  ? 'bg-indigo-950/25 border-indigo-500/40 text-white' 
+                                  : 'bg-zinc-900 hover:bg-zinc-800/80 border-transparent text-zinc-350'
                             }`}
                           >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <span className={`w-3 h-3 rounded-full flex-shrink-0 ${m.isHighlighted ? 'bg-red-500 ring-2 ring-red-500/30' : 'bg-[#1a235a]'}`} />
-                              <span className="font-semibold text-xs truncate max-w-[140px] sm:max-w-[210px]">{m.title || '(Untitled Stage)'}</span>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <GripVertical className="w-3.5 h-3.5 text-zinc-550 hover:text-zinc-350 shrink-0 cursor-grab" />
+                              <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${m.isHighlighted ? 'bg-red-500 ring-2 ring-red-500/30' : 'bg-[#1a235a]'}`} />
+                              <span className="font-semibold text-xs truncate max-w-[120px] sm:max-w-[190px]">{m.title || '(Untitled Stage)'}</span>
                             </div>
 
                             <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition">
-                              <button 
-                                onClick={(e) => { e.stopPropagation(); handleMoveMilestone(idx, 'up'); }}
-                                disabled={idx === 0}
-                                className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-zinc-800 text-zinc-400 bg-transparent border-0 cursor-pointer"
-                                title="Move Rank Up"
-                              >
-                                <ArrowUp className="w-3.5 h-3.5" />
-                              </button>
-                              <button 
-                                onClick={(e) => { e.stopPropagation(); handleMoveMilestone(idx, 'down'); }}
-                                disabled={idx === milestones.length - 1}
-                                className="p-1 hover:text-indigo-400 disabled:opacity-20 rounded hover:bg-zinc-800 text-zinc-400 bg-transparent border-0 cursor-pointer"
-                                title="Move Rank Down"
-                              >
-                                <ArrowDown className="w-3.5 h-3.5" />
-                              </button>
                               <button 
                                 onClick={(e) => handleDeleteMilestone(m.id, e)}
                                 className="p-1 hover:text-rose-450 rounded hover:bg-zinc-800 text-zinc-500 bg-transparent border-0 cursor-pointer"

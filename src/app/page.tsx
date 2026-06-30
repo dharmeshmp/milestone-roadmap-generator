@@ -295,6 +295,18 @@ function App() {
     });
   };
 
+  const handleReorderMilestones = (orderedIds: string[]) => {
+    const result = [...milestones].sort((a, b) => orderedIds.indexOf(a.id) - orderedIds.indexOf(b.id));
+    setMilestones(result);
+    reorderMilestones(orderedIds).then((success) => {
+      if (success) {
+        showNotification('Roadmap order updated');
+      } else {
+        showNotification('Failed to save order to database', 'error');
+      }
+    });
+  };
+
   // --- HANDLERS FOR ASSIGNEES ---
   
   const handleAddAssignee = (milestoneId: string) => {
@@ -675,6 +687,7 @@ function App() {
             handleUpdateTicket={handleUpdateTicket}
             selectedDate={selectedDate}
             handleReorderDevelopers={handleReorderDevelopers}
+            handleReorderMilestones={handleReorderMilestones}
             capacityDates={capacityDates}
             setCapacityDates={setCapacityDates}
             showGlobalCapacityDevIds={showGlobalCapacityDevIds}
