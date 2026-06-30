@@ -3,6 +3,46 @@ import { Clipboard, Clock, Calendar, User, LayoutGrid, List } from 'lucide-react
 import { JiraTicket, TeamMember } from '../types';
 import { Badge, EmptyState } from './ui';
 
+const InlineRemarkInput = ({ 
+  ticketId, 
+  initialRemark, 
+  handleUpdateTicket 
+}: { 
+  ticketId: string; 
+  initialRemark: string; 
+  handleUpdateTicket: <K extends keyof JiraTicket>(id: string, key: K, value: JiraTicket[K]) => void;
+}) => {
+  const [val, setVal] = React.useState(initialRemark);
+
+  React.useEffect(() => {
+    setVal(initialRemark);
+  }, [initialRemark]);
+
+  const handleBlur = () => {
+    if (val !== initialRemark) {
+      handleUpdateTicket(ticketId, 'remark', val);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur();
+    }
+  };
+
+  return (
+    <input
+      type="text"
+      value={val}
+      onChange={(e) => setVal(e.target.value)}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+      placeholder="Click to add remark..."
+      className="bg-transparent text-zinc-450 italic placeholder:text-zinc-650/70 text-xs w-full border-0 focus:border-0 outline-none focus:outline-none focus:text-zinc-100 focus:bg-zinc-950/40 focus:ring-1 focus:ring-zinc-800/80 px-2.5 py-1 rounded transition-all"
+    />
+  );
+};
+
 interface TicketBoardCanvasProps {
   tickets: JiraTicket[];
   teamMembers: TeamMember[];
@@ -253,33 +293,46 @@ export default function TicketBoardCanvas({
                         <td className="px-5 py-3.5 font-semibold text-zinc-100 max-w-sm truncate">
                           {ticket.title || 'Untitled Activity'}
                         </td>
-                        <td className="px-5 py-3.5">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${statusColorClasses}`}>
-                            <span className={`w-1 h-1 rounded-full ${
+                        <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
+                          <div className="relative inline-flex items-center">
+                            <span className={`absolute left-2.5 w-1.5 h-1.5 rounded-full pointer-events-none ${
                               ticket.status === 'To Do' ? 'bg-zinc-500' :
                               ticket.status === 'In Progress' ? 'bg-indigo-500 animate-pulse' :
                               ticket.status === 'Reassigned' ? 'bg-amber-500' :
                               'bg-emerald-500'
                             }`} />
-                            {ticket.status}
-                          </span>
+                            <select
+                              value={ticket.status}
+                              onChange={(e) => handleUpdateTicket(ticket.id, 'status', e.target.value as any)}
+                              className={`appearance-none pl-6 pr-6.5 py-0.5 rounded-full text-[10px] font-bold border cursor-pointer focus:outline-none focus:ring-1 focus:ring-indigo-500/50 [color-scheme:dark] transition-all ${statusColorClasses}`}
+                            >
+                              <option value="To Do" className="bg-zinc-900 text-zinc-400">To Do</option>
+                              <option value="In Progress" className="bg-zinc-900 text-indigo-400 font-bold">In Progress</option>
+                              <option value="Reassigned" className="bg-zinc-900 text-amber-400 font-bold">Reassigned</option>
+                              <option value="Done" className="bg-zinc-900 text-emerald-400 font-bold">Done</option>
+                            </select>
+                            <span className="absolute right-2.5 pointer-events-none text-[8px] opacity-40 select-none">▼</span>
+                          </div>
                         </td>
-                        <td className="px-5 py-3.5">
-                          <div className="flex items-center gap-2">
-                            {developer ? (
-                              <>
-                                <span 
-                                  className="w-2 h-2 rounded-full shrink-0"
-                                  style={{ backgroundColor: developer.color || '#2580eb' }}
-                                />
-                                <span className="font-semibold text-zinc-350 text-xs">{developer.name}</span>
-                              </>
-                            ) : (
-                              <>
-                                <User className="w-3.5 h-3.5 text-zinc-650 shrink-0" />
-                                <span className="text-zinc-500 italic text-xs">Unassigned</span>
-                              </>
-                            )}
+                        <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
+                          <div className="relative inline-flex items-center">
+                            <span 
+                              className="absolute left-2.5 w-1.5 h-1.5 rounded-full pointer-events-none transition-colors"
+                              style={{ backgroundColor: developer ? (developer.color || '#2580eb') : '#52525b' }}
+                            />
+                            <select
+                              value={ticket.assignee_id || ''}
+                              onChange={(e) => handleUpdateTicket(ticket.id, 'assignee_id', e.target.value || null)}
+                              className="appearance-none pl-6 pr-6.5 py-0.5 rounded-full text-[10px] font-bold border border-zinc-800 bg-zinc-900/60 text-zinc-300 cursor-pointer focus:outline-none focus:ring-1 focus:ring-indigo-500/50 [color-scheme:dark] transition-all"
+                            >
+                              <option value="" className="bg-zinc-900 text-zinc-500 font-semibold">Unassigned</option>
+                              {teamMembers.map((member) => (
+                                <option key={member.id} value={member.id} className="bg-zinc-900 text-zinc-200 font-semibold">
+                                  {member.name}
+                                </option>
+                              ))}
+                            </select>
+                            <span className="absolute right-2.5 pointer-events-none text-[8px] opacity-40 select-none">▼</span>
                           </div>
                         </td>
                         <td className="px-5 py-3.5 font-mono">
@@ -292,8 +345,12 @@ export default function TicketBoardCanvas({
                             <span className="text-zinc-600">-</span>
                           )}
                         </td>
-                        <td className="px-5 py-3.5 text-zinc-400 italic max-w-xs truncate" title={ticket.remark}>
-                          {ticket.remark ? `"${ticket.remark}"` : ''}
+                        <td className="px-5 py-3.5 text-zinc-400 max-w-xs" onClick={(e) => e.stopPropagation()}>
+                          <InlineRemarkInput
+                            ticketId={ticket.id}
+                            initialRemark={ticket.remark || ''}
+                            handleUpdateTicket={handleUpdateTicket}
+                          />
                         </td>
                       </tr>
                     );
