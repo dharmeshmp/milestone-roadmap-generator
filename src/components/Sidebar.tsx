@@ -64,7 +64,7 @@ interface SidebarProps {
 
   handleAddMilestone: () => void;
   handleDeleteMilestone: (id: string, e?: React.MouseEvent) => void;
-  handleUpdateMilestone: <K extends keyof Milestone>(id: string, key: K, value: Milestone[K]) => void;
+  handleUpdateMilestone: <K extends keyof Milestone>(id: string, keyOrUpdates: K | Partial<Milestone>, value?: Milestone[K]) => void;
   handleMoveMilestone: (index: number, direction: 'up' | 'down') => void;
 
   newAssigneeName: string;
@@ -589,8 +589,7 @@ export default function Sidebar({
                             value={selectedMilestone.statusBg + '|' + selectedMilestone.statusText}
                             onChange={(e) => {
                               const [bg, text] = e.target.value.split('|');
-                              handleUpdateMilestone(selectedMilestone.id, 'statusBg', bg);
-                              handleUpdateMilestone(selectedMilestone.id, 'statusText', text);
+                              handleUpdateMilestone(selectedMilestone.id, { statusBg: bg, statusText: text });
                             }}
                             className="w-full bg-zinc-950 border border-zinc-800 rounded-lg py-1.5 px-2 text-xs text-white focus:outline-none"
                           >

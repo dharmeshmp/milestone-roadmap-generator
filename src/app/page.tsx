@@ -248,15 +248,29 @@ function App() {
     });
   };
 
-  const handleUpdateMilestone = <K extends keyof Milestone>(id: string, key: K, value: Milestone[K]) => {
-    const current = milestones.find(m => m.id === id);
-    if (!current) return;
-    const updatedMilestone = { ...current, [key]: value };
-    setMilestones(prev => prev.map(m => m.id === id ? updatedMilestone : m));
-    updateMilestone(updatedMilestone).then((success) => {
-      if (!success) {
-        showNotification('Failed to update milestone in database', 'error');
+  const handleUpdateMilestone = <K extends keyof Milestone>(
+    id: string, 
+    keyOrUpdates: K | Partial<Milestone>, 
+    value?: Milestone[K]
+  ) => {
+    setMilestones(prev => {
+      const current = prev.find(m => m.id === id);
+      if (!current) return prev;
+      
+      let updatedMilestone: Milestone;
+      if (typeof keyOrUpdates === 'object' && keyOrUpdates !== null) {
+        updatedMilestone = { ...current, ...keyOrUpdates };
+      } else {
+        updatedMilestone = { ...current, [keyOrUpdates as K]: value as Milestone[K] };
       }
+
+      updateMilestone(updatedMilestone).then((success) => {
+        if (!success) {
+          showNotification('Failed to update milestone in database', 'error');
+        }
+      });
+
+      return prev.map(m => m.id === id ? updatedMilestone : m);
     });
   };
 
